@@ -10,6 +10,15 @@
 
 [Click here to finish setting up your workspace!](https://cloud.nx.app/connect/HufXZ6RizS)
 
+
+## Initial Setup
+
+1. Clone the repo
+2. Install the dependencies in the root of the project
+```sh
+yarn install
+```
+
 ## Run tasks
 
 To list all the projects, use:
