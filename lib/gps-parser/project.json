@@ -1,0 +1,19 @@
+{
+  "name": "gps-parser",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "lib/gps-parser/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/lib/gps-parser",
+        "main": "lib/gps-parser/src/index.ts",
+        "tsConfig": "lib/gps-parser/tsconfig.lib.json",
+        "assets": ["lib/gps-parser/*.md"]
+      }
+    }
+  }
+}
