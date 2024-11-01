@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@bus-tracking-system/constants": ["shared/constants/src/index.ts"],
       "@bus-tracking-system/gps-parser": ["lib/gps-parser/src/index.ts"],
       "@bus-tracking-system/shared-types": ["shared-types/src/index.ts"],
       "@bus-tracking-system/types": ["shared/types/src/index.ts"]
