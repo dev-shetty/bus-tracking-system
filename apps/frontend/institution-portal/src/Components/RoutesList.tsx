@@ -11,18 +11,37 @@ const RoutesList: React.FC = () => {
     {
       name: 'Sahyadri to Ullal',
       busId: 'KA19A0001',
-      stops: ['Adyar', 'Kannur', 'Padil', 'Pumpwell', 'Thokkottu', 'Ullal']
+      stops: ['Adyar', 'Kannur', 'Padil', 'Pumpwell', 'Thokkottu', 'Ullal'],
     },
     {
       name: 'Sahyadri to Kateel',
       busId: 'KA19A0002',
-      stops: ['Adyar', 'Kannur', 'Padil', 'Pumpwell', 'Thokkottu', 'Kateel']
+      stops: ['Adyar', 'Kannur', 'Padil', 'Pumpwell', 'Thokkottu', 'Kateel'],
     },
-    // Add more routes as needed
+    {
+      name: 'Sahyadri to Bantwal',
+      busId: 'KA19A0003',
+      stops: ['Adyar', 'Kannur', 'Padil', 'Pumpwell', 'Thokkottu', 'Kateel'],
+    },
+    {
+      name: 'Sahyadri to Kavoor',
+      busId: 'KA19A0004',
+      stops: ['Adyar', 'Kannur', 'Padil', 'Pumpwell', 'Thokkottu', 'Kateel'],
+    },
+    {
+      name: 'Sahyadri to Konaje',
+      busId: 'KA19A0007',
+      stops: ['Adyar', 'Kannur', 'Padil', 'Pumpwell', 'Thokkottu', 'Kateel'],
+    },
+    {
+      name: 'Sahyadri to Mulky',
+      busId: 'KA19A0008',
+      stops: ['Adyar', 'Kannur', 'Padil', 'Pumpwell', 'Thokkottu', 'Kateel'],
+    },
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-14 md:grid-cols-2 lg:grid-cols-3 mx-20">
       {routes.map((route) => (
         <div key={route.busId} className="bg-white rounded-lg shadow-md p-4">
           <div className="mb-4 flex items-center gap-4">
