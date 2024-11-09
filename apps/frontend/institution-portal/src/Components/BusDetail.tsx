@@ -29,7 +29,108 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
       parentContact: '+919876543210',
       pickupLocation: 'Padil',
     },
-    // Add more students as needed
+    {
+      name: 'Shrutha',
+      residence: 'Padil',
+      parentContact: '+919876543210',
+      pickupLocation: 'Padil',
+    },
+    {
+      name: 'Akkil',
+      residence: 'Padil',
+      parentContact: '+919876543210',
+      pickupLocation: 'Padil',
+    },
+    {
+      name: 'Adithya',
+      residence: 'Naguri',
+      parentContact: '+919876543210',
+      pickupLocation: 'Naguri',
+    },
+    {
+      name: 'Rohan',
+      residence: 'Pumpwell',
+      parentContact: '+919876543210',
+      pickupLocation: 'Pumpwell',
+    },
+    {
+      name: 'Babith',
+      residence: 'Pumpwell',
+      parentContact: '+919876543210',
+      pickupLocation: 'Pumpwell',
+    },
+    {
+      name: 'Parth',
+      residence: 'Pumpwell',
+      parentContact: '+919876543210',
+      pickupLocation: 'Pumpwell',
+    },
+    {
+      name: 'Prajwal',
+      residence: 'Bendoorwell',
+      parentContact: '+919876543210',
+      pickupLocation: 'Kankanady',
+    },
+    {
+      name: 'Sahan',
+      residence: 'SS Nagar',
+      parentContact: '+919876543210',
+      pickupLocation: 'Jyothi Circle',
+    },
+    {
+      name: 'Sujan',
+      residence: 'SS Nagar',
+      parentContact: '+919876543210',
+      pickupLocation: 'Jyothi Circle',
+    },
+    {
+      name: 'Srujan',
+      residence: 'Police lane',
+      parentContact: '+919876543210',
+      pickupLocation: 'Hampankatta',
+    },
+    {
+      name: 'Aadil',
+      residence: 'Police lane',
+      parentContact: '+919876543210',
+      pickupLocation: 'Hampankatta',
+    },
+    {
+      name: 'Keerthan',
+      residence: 'Pandeshwar',
+      parentContact: '+919876543210',
+      pickupLocation: 'Pandeshwar',
+    },
+    {
+      name: 'Kripesh',
+      residence: 'Pandeshwar',
+      parentContact: '+919876543210',
+      pickupLocation: 'Pandeshwar',
+    },
+    {
+      name: 'Ninad',
+      residence: 'Pandeshwar',
+      parentContact: '+919876543210',
+      pickupLocation: 'Pandeshwar',
+    },
+    {
+      name: 'Kaushik',
+      residence: 'Mangaladevi',
+      parentContact: '+919876543210',
+      pickupLocation: 'Mangaladevi',
+    },
+    {
+      name: 'Rezaan',
+      residence: 'Mangaladevi',
+      parentContact: '+919876543210',
+      pickupLocation: 'Mangaladevi',
+    },
+    {
+      name: 'Adithya Nayak',
+      residence: 'Morgans gate',
+      parentContact: '+919876543210',
+      pickupLocation: 'Morgans gate',
+    },
   ];
 
   const busDetails = {
@@ -85,7 +186,7 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
         <div className="flex-1 p-6 relative flex flex-col">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100"
+            className="absolute top-4 right-14 p-2 rounded-full hover:bg-gray-100"
           >
             <X className="h-6 w-6" />
             <span className="sr-only">Close</span>
