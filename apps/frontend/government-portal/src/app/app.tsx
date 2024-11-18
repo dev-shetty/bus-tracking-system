@@ -12,7 +12,7 @@ const App: React.FC = () => {
         <div className="flex h-16 items-center px-4 justify-between">
           <Menubar/>
           <div className="flex items-center">
-            <h1 className="text-xl font-bold">Bus Tracker</h1>
+            <h1 className="text-xl font-bold">Bus Tracker - Government Portal</h1>
           </div>
         </div>
       </header>

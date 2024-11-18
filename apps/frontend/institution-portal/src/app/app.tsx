@@ -15,7 +15,7 @@ const App: React.FC = () => {
         <div className="flex h-16 items-center px-4 justify-between">
           <div className="flex items-center">
             <Menubar activeView={activeView} setActiveView={setActiveView} />
-            <h1 className="text-xl font-bold">Bus Tracker</h1>
+            <h1 className="text-xl font-bold">Bus Tracker - Institution Portal</h1>
           </div>
           <button
             onClick={(e) => {
