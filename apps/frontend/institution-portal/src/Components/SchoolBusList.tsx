@@ -9,6 +9,8 @@ interface Bus {
   route: string;
   status: string;
   driver: string;
+  latitude: string;
+  longitude: string;
 }
 
 const SchoolBusList: React.FC = () => {
@@ -42,6 +44,8 @@ const SchoolBusList: React.FC = () => {
             route: vehicle.Location || 'Unknown Route',
             status: vehicle.IGN || 'Unknown Status',
             driver: `${vehicle.Driver_First_Name} ${vehicle.Driver_Last_Name}`.trim() || 'Unknown Driver',
+            latitude: vehicle.Latitude || "Unknown",
+            longitude: vehicle.Longitude || "Unknown",
           }));
   
           setBuses(transformedData);
@@ -70,6 +74,17 @@ const SchoolBusList: React.FC = () => {
               <p className="text-sm text-gray-600">Location: {bus.route}</p>
               <p className="text-sm text-gray-600">Current Status: {bus.status}</p>
               <p className="text-sm text-gray-600">Ramesh Kumar</p>
+              <p className="text-sm text-gray-600">
+                Coordinates:  
+                <a
+                  href={`https://www.openstreetmap.org/?mlat=${bus.latitude}&mlon=${bus.longitude}#map=15/${bus.latitude}/${bus.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 underline"
+                >
+                  {`${bus.latitude}, ${bus.longitude}`}
+                </a>
+              </p>
             </div>
             <button onClick={() => setSelectedBus(bus.id)} className="px-3 py-1 bg-black text-white rounded-md text-sm">
               View
