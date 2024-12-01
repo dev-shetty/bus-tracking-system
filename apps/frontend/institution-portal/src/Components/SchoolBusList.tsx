@@ -24,7 +24,6 @@ const SchoolBusList: React.FC = () => {
       const fetchData = async () => {
         const now = Date.now();
         if (now - lastFetchTime < 60000) {
-          // If less than a minute has passed, do not fetch
           console.log('Using cached data');
           setLoading(false);
           return;
@@ -32,7 +31,7 @@ const SchoolBusList: React.FC = () => {
   
         setLoading(true);
         try {
-          const response = await fetch(apiLink); // Replace with your actual API URL
+          const response = await fetch(apiLink); 
           if (!response.ok) {
             throw new Error(`Error: ${response.status} ${response.statusText}`);
           }
@@ -49,7 +48,7 @@ const SchoolBusList: React.FC = () => {
           }));
   
           setBuses(transformedData);
-          setLastFetchTime(now); // Update the last fetch timestamp
+          setLastFetchTime(now);
         } catch (err: any) {
           setError(err.message);
         } finally {
@@ -58,7 +57,7 @@ const SchoolBusList: React.FC = () => {
       };
   
       fetchData();
-    }, [lastFetchTime]); // Reactively fetch data only when needed
+    }, [lastFetchTime]);
   
 
 
@@ -73,7 +72,7 @@ const SchoolBusList: React.FC = () => {
               <h3 className="font-semibold">{bus.id}</h3>
               <p className="text-sm text-gray-600">Location: {bus.route}</p>
               <p className="text-sm text-gray-600">Current Status: {bus.status}</p>
-              <p className="text-sm text-gray-600">Ramesh Kumar</p>
+              <p className="text-sm text-gray-600">Driver: Unknown</p>
               <p className="text-sm text-gray-600">
                 Coordinates:  
                 <a
