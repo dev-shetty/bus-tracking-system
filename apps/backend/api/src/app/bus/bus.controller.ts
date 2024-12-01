@@ -1,91 +1,149 @@
-import { Controller, Injectable, UseGuards } from '@nestjs/common';
-import { Body, Get, Post, Put, Delete, Param } from '@nestjs/common';
-import { DatabaseService } from '../../common/services/database.service';
-import { CreateBusDto } from './dto/bus.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  UseGuards,
+  Put,
+  Delete,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { BusService } from './bus.service';
+import { CreateStudentDto } from '../student/dto/student.dto';
+import { UpdateBusDto } from './dto/update-bus.dto';
+import { DatabaseService } from '../../common/services/database.service';
 
-@Controller('bus')
+@ApiTags('Buses')
+@ApiBearerAuth()
+@Controller('buses')
 @UseGuards(AuthGuard('jwt'))
 export class BusController {
-  constructor(private readonly dbService: DatabaseService) {}
+  constructor(
+    private readonly busService: BusService,
+    private readonly dbService: DatabaseService
+  ) {}
 
-  @Post()
-  async createBusEntry(@Body() busData: CreateBusDto) {
-    const query = `
-      INSERT INTO bus (bus_no, institution_id, driver_id, device_id)
-      VALUES ($1, $2, $3, $4)
-      RETURNING *`;
-    
-    const values = [
-      busData.bus_no,
-      busData.institution_id,
-      busData.driver_id,
-      busData.device_id
-    ];
-
-    const result = await this.dbService.query(query, values);
-    return result.rows[0];
+  @Get('drivers')
+  @ApiOperation({ summary: 'Get all drivers' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all drivers.',
+  })
+  getAllDrivers() {
+    return this.busService.findAllDrivers();
   }
 
-  @Get()
-  async getAllBusEntries() {
-    const query = `
-      SELECT b.*, i.name as institution_name, d.name as driver_name
-      FROM bus b
-      JOIN institution i ON b.institution_id = i.id
-      JOIN driver d ON b.driver_id = d.id`;
-    
-    const result = await this.dbService.query(query);
-    return result.rows;
+  @Get('routes')
+  @ApiOperation({ summary: 'Get all routes' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all bus routes.',
+  })
+  getAllRoutes() {
+    return this.busService.findAllRoutes();
   }
 
-  @Get(':id')
-  async getBusEntry(@Param('id') id: string) {
-    const query = `
-      SELECT b.*, i.name as institution_name, d.name as driver_name
-      FROM bus b
-      JOIN institution i ON b.institution_id = i.id
-      JOIN driver d ON b.driver_id = d.id
-      WHERE b.id = $1`;
-    
-    const result = await this.dbService.query(query, [id]);
-    if (result.rows.length === 0) {
-      throw new Error('Bus not found');
-    }
-    return result.rows[0];
+  @Get(':busId/students')
+  @ApiOperation({ summary: 'Get all students in a bus' })
+  @ApiParam({ name: 'busId', description: 'Bus ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all students in the specified bus.',
+  })
+  getBusStudents(@Param('busId') busId: string) {
+    return this.busService.findBusStudents(+busId);
+  }
+
+  @Post(':busId/students')
+  @ApiOperation({ summary: 'Add new student to bus' })
+  @ApiParam({ name: 'busId', description: 'Bus ID' })
+  @ApiResponse({
+    status: 201,
+    description: 'Student has been successfully added to the bus.',
+  })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  addStudentToBus(
+    @Param('busId') busId: string,
+    @Body() createStudentDto: CreateStudentDto
+  ) {
+    return this.busService.addStudent(+busId, createStudentDto);
   }
 
   @Put(':id')
-  async updateBusEntry(@Param('id') id: string, @Body() busData: CreateBusDto) {
+  @ApiOperation({ summary: 'Update a bus entry' })
+  @ApiResponse({
+    status: 200,
+    description: 'Bus has been successfully updated.',
+  })
+  @ApiResponse({ status: 404, description: 'Bus not found.' })
+  async updateBusEntry(@Param('id') id: string, @Body() busData: UpdateBusDto) {
     const query = `
       UPDATE bus 
       SET bus_no = $1, institution_id = $2, driver_id = $3, device_id = $4
       WHERE id = $5
       RETURNING *`;
-    
+
     const values = [
       busData.bus_no,
       busData.institution_id,
       busData.driver_id,
       busData.device_id,
-      id
+      id,
     ];
 
     const result = await this.dbService.query(query, values);
     if (result.rows.length === 0) {
-      throw new Error('Bus not found');
+      throw new NotFoundException('Bus not found');
     }
     return result.rows[0];
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete a bus entry' })
+  @ApiResponse({
+    status: 200,
+    description: 'Bus has been successfully deleted.',
+  })
+  @ApiResponse({ status: 404, description: 'Bus not found.' })
   async deleteBusEntry(@Param('id') id: string) {
-    const query = 'DELETE FROM bus WHERE id = $1 RETURNING *';
-    const result = await this.dbService.query(query, [id]);
-    
-    if (result.rows.length === 0) {
-      throw new Error('Bus not found');
+    // First check if bus has any associated students
+    const checkStudentsQuery = `
+      SELECT COUNT(*) FROM student WHERE bus_id = $1
+    `;
+    const studentsResult = await this.dbService.query(checkStudentsQuery, [id]);
+    if (studentsResult.rows[0].count > 0) {
+      throw new BadRequestException(
+        'Cannot delete bus with associated students'
+      );
     }
-    return result.rows[0];
+
+    // Then check if bus has any routes
+    const checkRoutesQuery = `
+      SELECT COUNT(*) FROM route WHERE bus_id = $1
+    `;
+    const routesResult = await this.dbService.query(checkRoutesQuery, [id]);
+    if (routesResult.rows[0].count > 0) {
+      throw new BadRequestException('Cannot delete bus with associated routes');
+    }
+
+    const deleteQuery = `
+      DELETE FROM bus WHERE id = $1
+      RETURNING *`;
+
+    const result = await this.dbService.query(deleteQuery, [id]);
+    if (result.rows.length === 0) {
+      throw new NotFoundException('Bus not found');
+    }
+    return { message: 'Bus deleted successfully' };
   }
 }
