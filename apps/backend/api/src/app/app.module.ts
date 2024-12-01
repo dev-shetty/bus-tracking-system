@@ -1,21 +1,33 @@
-import { Module } from '@nestjs/common';
-
-import { AppController } from './app.controller';
-import { ConfigModule } from '@nestjs/config';
-import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { databaseConfig } from 'apps/backend/api/src/config/database.config';
-import { HealthController } from './health/health.controller';
-
+import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { DatabaseService } from '../common/services/database.service';
+import { BusController } from './bus/bus.controller';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './auth/jwt.strategy';
+import { AuthController } from './auth/auth.controller';
+import { AuthModule } from './auth/auth.module';
 @Module({
+  controllers: [BusController, AuthController],
+  providers: [DatabaseService, JwtStrategy],
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
+    PassportModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '60m' },
     }),
-    TypeOrmModule.forRoot(databaseConfig),
+    AuthModule,
   ],
-  controllers: [AppController, HealthController],
-  providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply((req, res, next) => {
+        if (req.originalUrl === '/api') {
+          res.json({ status: 'ok' });
+          return;
+        }
+        next();
+      })
+      .forRoutes('*');
+  }
+}
