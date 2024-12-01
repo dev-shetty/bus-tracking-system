@@ -9,9 +9,9 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="border-b bg-white relative">
-        <div className="flex h-16 items-center px-4 justify-between">
+        <div className="flex h-16 items-center px-4">
           <Menubar/>
-          <div className="flex items-center">
+          <div className="flex items-center pl-9">
             <h1 className="text-xl font-bold">Bus Tracker - Government Portal</h1>
           </div>
         </div>
