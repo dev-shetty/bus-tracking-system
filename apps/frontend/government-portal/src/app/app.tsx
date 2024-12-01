@@ -1,50 +1,32 @@
-import NxWelcome from './nx-welcome';
+import React from 'react';
+import { Route, Routes } from 'react-router-dom';
+import CollegeList from '../Components/CollegeList';
+import InstitutionDashboard from '../Components/InstitutionDashboard';
+import Menubar from '../Components/Menubar';
+import AddCollege from '../Components/AddCollege';
 
-import { Route, Routes, Link } from 'react-router-dom';
-
-export function App() {
+const App: React.FC = () => {
   return (
-    <div>
-      <NxWelcome title="government-portal" />
+    <div className="min-h-screen bg-gray-50">
+      <header className="border-b bg-white relative">
+        <div className="flex h-16 items-center px-4 justify-between">
+          <Menubar/>
+          <div className="flex items-center">
+            <h1 className="text-xl font-bold">Bus Tracker - Government Portal</h1>
+          </div>
+        </div>
+      </header>
 
-      {/* START: routes */}
-      {/* These routes and navigation have been generated for you */}
-      {/* Feel free to move and update them to fit your needs */}
-      <br />
-      <hr />
-      <br />
-      <div role="navigation">
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/page-2">Page 2</Link>
-          </li>
-        </ul>
-      </div>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <div>
-              This is the generated root route.{' '}
-              <Link to="/page-2">Click here for page 2.</Link>
-            </div>
-          }
-        />
-        <Route
-          path="/page-2"
-          element={
-            <div>
-              <Link to="/">Click here to go back to root page.</Link>
-            </div>
-          }
-        />
-      </Routes>
-      {/* END: routes */}
+      <main className="container mx-auto p-4">
+        <Routes>
+          <Route path="/" element={<CollegeList />} />
+          <Route path="/institution/:id" element={<InstitutionDashboard />} />
+          <Route path="/add-college" element={<AddCollege />} />
+          <Route path="/notifications" element={<div>Notifications Page</div>} />
+        </Routes>
+      </main>
     </div>
   );
-}
+};
 
 export default App;
