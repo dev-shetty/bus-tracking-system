@@ -78,15 +78,27 @@ CREATE TABLE parent_student (
 );
 
 -- Create bus_location table
+-- timestamp is primary key because timescaledb creates partitioning based on time
 CREATE TABLE bus_location (
-    id SERIAL PRIMARY KEY,
+    id SERIAL,
     bus_id INTEGER NOT NULL,
-    latitude DECIMAL(10, 7) NOT NULL,
-    longitude DECIMAL(10, 7) NOT NULL,
+    latitude NUMERIC(10, 7) NOT NULL,
+    longitude NUMERIC(10, 7) NOT NULL,
     speed INTEGER NOT NULL,
     course INTEGER NOT NULL,
-    timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    timestamp TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (bus_id, timestamp),
     FOREIGN KEY (bus_id) REFERENCES bus(id)
+);
+
+-- Create users table
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  role VARCHAR(50) NOT NULL,
+  institution_id INTEGER REFERENCES institution(id)
 );
 
 -- Insert data into tables
