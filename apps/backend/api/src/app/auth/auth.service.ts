@@ -1,35 +1,21 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { LoginDto } from './dto/login.dto';
-import { Role } from './enums/role.enum';
+import { DatabaseService } from '../../common/services/database.service';
+import * as bcrypt from 'bcrypt';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private dbService: DatabaseService
+  ) {}
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: { username: string; password: string }) {
     // For demo purposes, using hardcoded credentials
     // In production, validate against database
-    if (loginDto.email === 'govt@govt.com' && loginDto.password === 'govt123') {
-      const payload = {
-        username: loginDto.email,
-        sub: '1',
-        role: Role.GOVERNMENT,
-      };
-      return {
-        access_token: this.jwtService.sign(payload),
-      };
-    }
-
-    if (
-      loginDto.email === 'institution@test.com' &&
-      loginDto.password === 'inst123'
-    ) {
-      const payload = {
-        username: loginDto.email,
-        sub: '2',
-        role: Role.INSTITUTION,
-      };
+    if (loginDto.username === 'admin' && loginDto.password === 'admin123') {
+      const payload = { username: loginDto.username, sub: '1' };
       return {
         access_token: this.jwtService.sign(payload),
       };

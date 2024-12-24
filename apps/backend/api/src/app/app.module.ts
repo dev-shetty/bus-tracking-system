@@ -1,11 +1,9 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { databaseConfig } from '../config/database.config';
+import { DatabaseService } from '../common/services/database.service';
 import { BusController } from './bus/bus.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './auth/jwt.strategy';
-import { AuthController } from './auth/auth.controller';
 import { AuthModule } from './auth/auth.module';
 import { InstitutionModule } from './institution/institution.module';
 import { BusModule } from './bus/bus.module';
@@ -16,13 +14,7 @@ import { DatabaseModule } from '../common/services/database.module';
 
 @Module({
   controllers: [BusController, AuthController],
-  providers: [
-    JwtStrategy,
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
-    },
-  ],
+  providers: [DatabaseService, JwtStrategy],
   imports: [
     TypeOrmModule.forRoot(databaseConfig),
     DatabaseModule,
@@ -37,6 +29,8 @@ import { DatabaseModule } from '../common/services/database.module';
     UserModule,
   ],
 })
+
+// When '/api' is accessed, it returns a simple status check response
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer

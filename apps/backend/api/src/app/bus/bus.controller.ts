@@ -30,7 +30,7 @@ import { DatabaseService } from '../../common/services/database.service';
 export class BusController {
   constructor(
     private readonly busService: BusService,
-    private readonly dbService: DatabaseService
+  private readonly dbService: DatabaseService
   ) {}
 
   @Get('drivers')
