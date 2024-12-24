@@ -1,4 +1,13 @@
 -- Create tables
+DROP TABLE IF EXISTS route CASCADE;
+DROP TABLE IF EXISTS device CASCADE;
+DROP TABLE IF EXISTS bus CASCADE;
+DROP TABLE IF EXISTS driver CASCADE;
+DROP TABLE IF EXISTS institution CASCADE;
+DROP TABLE IF EXISTS parent_student CASCADE;
+DROP TABLE IF EXISTS student CASCADE;
+DROP TABLE IF EXISTS parent CASCADE;
+DROP TABLE IF EXISTS bus_location CASCADE;
 
 -- Create institution table
 CREATE TABLE institution (
@@ -18,24 +27,13 @@ CREATE TABLE driver (
 
 -- Create bus table
 CREATE TABLE bus (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY,
     bus_no INTEGER NOT NULL,
     institution_id INTEGER NOT NULL,
     driver_id INTEGER NOT NULL,
     device_id VARCHAR(50) NOT NULL,
     FOREIGN KEY (institution_id) REFERENCES institution(id),
     FOREIGN KEY (driver_id) REFERENCES driver(id)
-);
-
--- Create device table
-CREATE TABLE device (
-    id VARCHAR(50) PRIMARY KEY,
-    bus_id INTEGER NOT NULL,
-    type VARCHAR(50) NOT NULL,
-    status VARCHAR(50) NOT NULL,
-    battery_status VARCHAR(50) NOT NULL,
-    signal_strength INTEGER NOT NULL,
-    FOREIGN KEY (bus_id) REFERENCES bus(id)
 );
 
 -- Create route table
@@ -52,16 +50,18 @@ CREATE TABLE route (
 -- Create parent table
 CREATE TABLE parent (
     phone VARCHAR(20) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL
 );
 
 -- Create student table
 CREATE TABLE student (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
+    usn VARCHAR(255) NOT NULL,
+    year INTEGER NOT NULL,
     home_latitude DECIMAL(10, 7) NOT NULL,
     home_longitude DECIMAL(10, 7) NOT NULL,
+    home_address VARCHAR(255) NOT NULL,
     bus_id INTEGER NOT NULL,
     institution_id INTEGER NOT NULL,
     FOREIGN KEY (bus_id) REFERENCES bus(id),
@@ -106,24 +106,14 @@ CREATE TABLE users (
 CREATE OR REPLACE FUNCTION seed_bus_tracking_data() RETURNS VOID AS $$
 BEGIN
     -- Insert institutions
-    INSERT INTO institution (id, name, contact, latitude, longitude) VALUES
-        (1, 'City School', '123-456-7890', 40.7128, -74.0060),
-        (2, 'County High', '987-654-3210', 34.0522, -118.2437);
+    INSERT INTO institution (id, name, contact, latitude, longitude) VALUES (1, 'Sahyadri College of Engineering and Management', '08242277333', 12.868533721052383, 74.9254481089104);
 
     -- Insert drivers
-    INSERT INTO driver (id, name, mobile) VALUES
-        (1, 'John Doe', '555-1234'),
-        (2, 'Jane Smith', '555-5678');
+    INSERT INTO driver (id, name, mobile) VALUES (1, 'Ramesh Kumar', '9876543210');
 
     -- Insert buses
-    INSERT INTO bus (id, bus_no, institution_id, driver_id, device_id) VALUES
-        (1, 101, 1, 1, 'DEV001'),
-        (2, 102, 2, 2, 'DEV002');
+    INSERT INTO bus (id, bus_no, institution_id, driver_id, device_id) VALUES (7, 3048, 1, 1, '0bd16d97-78aa-438e-9b94-dd85b5452ae3');
 
-    -- Insert devices
-    INSERT INTO device (id, bus_id, type, status, battery_status, signal_strength) VALUES
-        ('DEV001', 1, 'GPS', 'Active', 'Full', 5),
-        ('DEV002', 2, 'GPS', 'Active', 'Medium', 4);
 
     -- Insert routes
     INSERT INTO route (id, bus_id, source_latitude, source_longitude, destination_latitude, destination_longitude) VALUES
@@ -131,19 +121,19 @@ BEGIN
         (2, 2, 34.0522, -118.2437, 34.1478, -118.1445);
 
     -- Insert parents
-    INSERT INTO parent (phone, name, email) VALUES
-        ('555-1111', 'Alice Johnson', 'alice@email.com'),
-        ('555-2222', 'Bob Williams', 'bob@email.com');
+    INSERT INTO parent (phone, name) VALUES
+        ('9876541203', 'Ramesh Kumar'),
+        ('9876541204', 'Rajesh Kumar');
 
     -- Insert students
-    INSERT INTO student (id, name, home_latitude, home_longitude, bus_id, institution_id) VALUES
-        (1, 'Charlie Johnson', 40.7300, -74.0100, 1, 1),
-        (2, 'Diana Williams', 34.0600, -118.2500, 2, 2);
+    INSERT INTO student (id, name, usn, year, home_latitude, home_longitude, home_address, bus_id, institution_id) VALUES
+        (1, 'Deveesh Shetty', '4SF21CS146', 4, 40.7300, -74.0100, '123 Main St, New York, NY 10001', 7, 1),
+        (2, 'Rohan', '4SF21CS127', 4, 34.0600, -118.2500, '456 Elm St, Los Angeles, CA 90001', 7, 1);
 
     -- Insert parent_student relationships
     INSERT INTO parent_student (student_id, phone) VALUES
-        (1, '555-1111'),
-        (2, '555-2222');
+        (1, '9876541203'),
+        (2, '9876541204');
 
     -- Insert bus_location data
     INSERT INTO bus_location (id, bus_id, latitude, longitude, speed, course, timestamp) VALUES
