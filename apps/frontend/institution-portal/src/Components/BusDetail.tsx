@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-import AddNewStudentToBus from './AddNewStudentToBus'; // Import the AddNewStudentToBus component
+import { X, Edit2 } from 'lucide-react';
+import AddNewStudentToBus from './AddNewStudentToBus';
+import EditBusDetails from './EditBusDetails';
 
 interface Student {
   id: number;
@@ -18,26 +19,37 @@ interface BusDetailProps {
 const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
   const [showMap, setShowMap] = useState(true);
   const [showAddStudentForm, setShowAddStudentForm] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
+  const [busDetails, setBusDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchStudents = async () => {
+    const fetchBusDetails = async () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch(`http://localhost:3000/api/buses/${busId}/students`);
-        if (!response.ok) {
+
+        const response = await fetch(`http://localhost:3000/api/buses/${busId}`);
+        if (!response.ok) throw new Error(`Failed to fetch bus details for ID: ${busId}`);
+        const busData = await response.json();
+
+        setBusDetails(busData);
+
+        const studentsResponse = await fetch(
+          `http://localhost:3000/api/buses/${busId}/students`
+        );
+        if (!studentsResponse.ok)
           throw new Error(`Failed to fetch students for bus ID: ${busId}`);
-        }
-        const data = await response.json();
-        const formattedStudents = data.map((student: any) => ({
+        const studentsData = await studentsResponse.json();
+
+        const formattedStudents = studentsData.map((student: any) => ({
           id: student.id,
           name: student.name,
-          residence: `${student.home_latitude}, ${student.home_longitude}`, // Convert latitude and longitude to residence
-          parentContact: 'Not Available', // Assuming parent contact is not part of the data schema
-          pickupLocation: 'Not Available', // Assuming pickup location is not part of the data schema
+          residence: `${student.home_latitude}, ${student.home_longitude}`,
+          parentContact: student.parent_contact || 'Not Available',
+          pickupLocation: student.pickup_location || 'Not Available',
         }));
         setStudents(formattedStudents);
       } catch (err) {
@@ -47,16 +59,27 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
       }
     };
 
-    fetchStudents();
+    fetchBusDetails();
   }, [busId]);
 
-  const busDetails = {
-    from: 'Sahyadri',
-    to: 'Ullal',
-    departureTime: '8:00 AM',
-    speed: '40 km/h',
-    numberOfStudents: students.length.toString(),
-    driver: 'Ramesh Kumar',
+  const handleEditSave = async (updatedData: any) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/buses/${busId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedData),
+      });
+      if (!response.ok) throw new Error('Failed to update bus details');
+
+      const updatedBus = await response.json();
+      setBusDetails(updatedBus);
+      setIsEditing(false);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to save changes.');
+    }
   };
 
   return (
@@ -64,45 +87,48 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
       <div className="flex h-full">
         {/* Left Sidebar */}
         <div className="w-64 border-r p-6 bg-gray-50">
-          <h2 className="text-xl font-bold mb-6">{busId}</h2>
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-gray-600">From:</p>
-              <p className="font-medium">{busDetails.from}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">To:</p>
-              <p className="font-medium">{busDetails.to}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Departure Time:</p>
-              <p className="font-medium">{busDetails.departureTime}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Speed:</p>
-              <p className="font-medium">{busDetails.speed}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">No. of students:</p>
-              <p className="font-medium">{busDetails.numberOfStudents}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Driver:</p>
-              <p className="font-medium">{busDetails.driver}</p>
-            </div>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold">{busId}</h2>
             <button
-              onClick={() => setShowMap(!showMap)}
-              className="w-full bg-black text-white rounded-md py-2 px-4 text-sm"
+              onClick={() => setIsEditing(true)}
+              className="p-2 rounded-full hover:bg-gray-100"
             >
-              {showMap ? 'View Students List' : 'View Bus Location'}
-            </button>
-            <button
-              onClick={() => setShowAddStudentForm(!showAddStudentForm)}
-              className="w-full bg-black text-white rounded-md py-2 px-4 text-sm mt-4"
-            >
-              {showAddStudentForm ? 'Hide Add Student Form' : 'Add New Student'}
+              <Edit2 className="h-6 w-6" />
+              <span className="sr-only">Edit</span>
             </button>
           </div>
+          {busDetails && !isEditing ? (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-600">From:</p>
+                <p className="font-medium">Sahyadri</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">To:</p>
+                <p className="font-medium">Ullal</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Departure Time:</p>
+                <p className="font-medium">9:30</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Driver:</p>
+                <p className="font-medium">Ramesh Kumar</p>
+              </div>
+              <button
+                onClick={() => setShowMap(!showMap)}
+                className="w-full bg-black text-white rounded-md py-2 px-4 text-sm"
+              >
+                {showMap ? 'View Students List' : 'View Bus Location'}
+              </button>
+              <button
+                onClick={() => setShowAddStudentForm(!showAddStudentForm)}
+                className="w-full bg-black text-white rounded-md py-2 px-4 text-sm mt-4"
+              >
+                {showAddStudentForm ? 'Hide Add Student Form' : 'Add New Student'}
+              </button>
+            </div>
+          ) : null}
         </div>
 
         {/* Main Content */}
@@ -115,7 +141,14 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
             <span className="sr-only">Close</span>
           </button>
 
-          {showAddStudentForm ? (
+          {isEditing ? (
+            <EditBusDetails
+              busId={busId}
+              initialData={busDetails}
+              onCancel={() => setIsEditing(false)}
+              onSave={handleEditSave}
+            />
+          ) : showAddStudentForm ? (
             <AddNewStudentToBus busId={busId} />
           ) : showMap ? (
             <div className="flex-1 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
@@ -134,9 +167,7 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
                       <th className="text-left py-4 px-4">Student Name</th>
                       <th className="text-left py-4 px-4">Residence Location</th>
                       <th className="text-left py-4 px-4">Parent Contact</th>
-                      <th className="text-left py-4 px-4">
-                        Pickup/Drop Location
-                      </th>
+                      <th className="text-left py-4 px-4">Pickup Location</th>
                     </tr>
                   </thead>
                   <tbody>
