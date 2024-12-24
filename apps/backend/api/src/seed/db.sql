@@ -122,30 +122,30 @@ BEGIN
         ('Institution Admin', 'admin@sahyadri.edu.in', 'admin123', 'institution');
 
 
-    -- Insert routes
-    INSERT INTO route (id, bus_id, source_latitude, source_longitude, destination_latitude, destination_longitude) VALUES
-        (1, 1, 40.7128, -74.0060, 40.7589, -73.9851),
-        (2, 2, 34.0522, -118.2437, 34.1478, -118.1445);
+    -- -- Insert routes
+    -- INSERT INTO route (id, bus_id, source_latitude, source_longitude, destination_latitude, destination_longitude) VALUES
+    --     (1, 1, 40.7128, -74.0060, 40.7589, -73.9851),
+    --     (2, 2, 34.0522, -118.2437, 34.1478, -118.1445);
 
-    -- Insert parents
-    INSERT INTO parent (phone, name) VALUES
-        ('9876541203', 'Ramesh Kumar'),
-        ('9876541204', 'Rajesh Kumar');
+    -- -- Insert parents
+    -- INSERT INTO parent (phone, name) VALUES
+    --     ('9876541203', 'Ramesh Kumar'),
+    --     ('9876541204', 'Rajesh Kumar');
 
-    -- Insert students
-    INSERT INTO student (id, name, usn, year, home_latitude, home_longitude, home_address, bus_id, institution_id) VALUES
-        (1, 'Deveesh Shetty', '4SF21CS146', 4, 40.7300, -74.0100, '123 Main St, New York, NY 10001', 7, 1),
-        (2, 'Rohan', '4SF21CS127', 4, 34.0600, -118.2500, '456 Elm St, Los Angeles, CA 90001', 7, 1);
+    -- -- Insert students
+    -- INSERT INTO student (id, name, usn, year, home_latitude, home_longitude, home_address, bus_id, institution_id) VALUES
+    --     (1, 'Deveesh Shetty', '4SF21CS146', 4, 40.7300, -74.0100, '123 Main St, New York, NY 10001', 7, 1),
+    --     (2, 'Rohan', '4SF21CS127', 4, 34.0600, -118.2500, '456 Elm St, Los Angeles, CA 90001', 7, 1);
 
-    -- Insert parent_student relationships
-    INSERT INTO parent_student (student_id, phone) VALUES
-        (1, '9876541203'),
-        (2, '9876541204');
+    -- -- Insert parent_student relationships
+    -- INSERT INTO parent_student (student_id, phone) VALUES
+    --     (1, '9876541203'),
+    --     (2, '9876541204');
 
-    -- Insert bus_location data
-    INSERT INTO bus_location (id, bus_id, latitude, longitude, speed, course, timestamp) VALUES
-        (1, 1, 40.7200, -74.0080, 30, 90, NOW()),
-        (2, 2, 34.0550, -118.2460, 25, 180, NOW());
+    -- -- Insert bus_location data
+    -- INSERT INTO bus_location (id, bus_id, latitude, longitude, speed, course, timestamp) VALUES
+    --     (1, 1, 40.7200, -74.0080, 30, 90, NOW()),
+    --     (2, 2, 34.0550, -118.2460, 25, 180, NOW());
 END;
 $$
  LANGUAGE plpgsql;
