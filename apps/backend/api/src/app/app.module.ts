@@ -6,6 +6,8 @@ import { JwtStrategy } from './auth/jwt.strategy';
 import { AuthModule } from './auth/auth.module';
 import { InstitutionModule } from './institution/institution.module';
 import { BusModule } from './bus/bus.module';
+import { LocationModule } from './location/location.module';
+
 @Module({
   providers: [DatabaseService, JwtStrategy],
   imports: [
@@ -17,6 +19,7 @@ import { BusModule } from './bus/bus.module';
     AuthModule,
     InstitutionModule,
     BusModule,
+    LocationModule,
   ],
 })
 

@@ -37,8 +37,7 @@ CREATE TABLE driver (
 
 -- Create bus table
 CREATE TABLE bus (
-    id INTEGER PRIMARY KEY,
-    bus_no INTEGER NOT NULL,
+    id VARCHAR(50) PRIMARY KEY NOT NULL,
     institution_id INTEGER NOT NULL,
     driver_id INTEGER NOT NULL,
     device_id VARCHAR(50) NOT NULL,
@@ -49,7 +48,7 @@ CREATE TABLE bus (
 -- Create route table
 CREATE TABLE route (
     id SERIAL PRIMARY KEY,
-    bus_id INTEGER NOT NULL,
+    bus_id VARCHAR(50) NOT NULL,
     source_latitude DECIMAL(10, 7) NOT NULL,
     source_longitude DECIMAL(10, 7) NOT NULL,
     destination_latitude DECIMAL(10, 7) NOT NULL,
@@ -72,7 +71,7 @@ CREATE TABLE student (
     home_latitude DECIMAL(10, 7) NOT NULL,
     home_longitude DECIMAL(10, 7) NOT NULL,
     home_address VARCHAR(255) NOT NULL,
-    bus_id INTEGER NOT NULL,
+    bus_id VARCHAR(50) NOT NULL,
     institution_id INTEGER NOT NULL,
     FOREIGN KEY (bus_id) REFERENCES bus(id),
     FOREIGN KEY (institution_id) REFERENCES institution(id)
@@ -91,7 +90,7 @@ CREATE TABLE parent_student (
 -- timestamp is primary key because timescaledb creates partitioning based on time
 CREATE TABLE bus_location (
     id SERIAL,
-    bus_id INTEGER NOT NULL,
+    bus_id VARCHAR(50) NOT NULL,
     latitude NUMERIC(10, 7) NOT NULL,
     longitude NUMERIC(10, 7) NOT NULL,
     speed INTEGER NOT NULL,
@@ -101,26 +100,11 @@ CREATE TABLE bus_location (
     FOREIGN KEY (bus_id) REFERENCES bus(id)
 );
 
--- Create users table
-CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  role VARCHAR(50) NOT NULL,
-  institution_id INTEGER REFERENCES institution(id)
-);
-
 -- Insert data into tables
 
 CREATE OR REPLACE FUNCTION seed_bus_tracking_data() RETURNS VOID AS $$
 BEGIN
-    -- Insert users
-    INSERT INTO users (name, email, password, role) VALUES 
-        ('John Doe', 'john@example.com', 'password123', 'normal'),
-        ('Gov Admin', 'gov@gov.in', 'gov123', 'government'),
-        ('Institution Admin', 'admin@sahyadri.edu.in', 'admin123', 'institution');
-
+    -- These 3 are mandatory, then you can insert from sahyadri_seed.sql
     -- Insert institutions
     INSERT INTO institution (id, name, contact, latitude, longitude) VALUES (1, 'Sahyadri College of Engineering and Management', '08242277333', 12.868533721052383, 74.9254481089104);
 
@@ -128,7 +112,15 @@ BEGIN
     INSERT INTO driver (id, name, mobile) VALUES (1, 'Ramesh Kumar', '9876543210');
 
     -- Insert buses
-    INSERT INTO bus (id, bus_no, institution_id, driver_id, device_id) VALUES (7, 3048, 1, 1, '0bd16d97-78aa-438e-9b94-dd85b5452ae3');
+    INSERT INTO bus (id, institution_id, driver_id, device_id) VALUES ('KA19AE3048', 1, 1, '0bd16d97-78aa-438e-9b94-dd85b5452ae3');
+
+    -- Insert users
+    -- This can also be done using the Auth API
+    INSERT INTO users (name, email, password, role) VALUES 
+        ('John Doe', 'john@example.com', 'password123', 'normal'),
+        ('Gov Admin', 'gov@gov.in', 'gov123', 'government'),
+        ('Institution Admin', 'admin@sahyadri.edu.in', 'admin123', 'institution');
+
 
     -- Insert routes
     INSERT INTO route (id, bus_id, source_latitude, source_longitude, destination_latitude, destination_longitude) VALUES
