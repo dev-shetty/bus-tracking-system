@@ -8,6 +8,16 @@ DROP TABLE IF EXISTS parent_student CASCADE;
 DROP TABLE IF EXISTS student CASCADE;
 DROP TABLE IF EXISTS parent CASCADE;
 DROP TABLE IF EXISTS bus_location CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+-- Create users table
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'normal' CHECK (role IN ('normal', 'government', 'institution'))
+);
 
 -- Create institution table
 CREATE TABLE institution (
@@ -95,6 +105,12 @@ CREATE TABLE bus_location (
 
 CREATE OR REPLACE FUNCTION seed_bus_tracking_data() RETURNS VOID AS $$
 BEGIN
+    -- Insert users
+    INSERT INTO users (name, email, password, role) VALUES 
+        ('John Doe', 'john@example.com', 'password123', 'normal'),
+        ('Gov Admin', 'gov@gov.in', 'gov123', 'government'),
+        ('Institution Admin', 'admin@sahyadri.edu.in', 'admin123', 'institution');
+
     -- Insert institutions
     INSERT INTO institution (id, name, contact, latitude, longitude) VALUES (1, 'Sahyadri College of Engineering and Management', '08242277333', 12.868533721052383, 74.9254481089104);
 
@@ -103,7 +119,6 @@ BEGIN
 
     -- Insert buses
     INSERT INTO bus (id, bus_no, institution_id, driver_id, device_id) VALUES (7, 3048, 1, 1, '0bd16d97-78aa-438e-9b94-dd85b5452ae3');
-
 
     -- Insert routes
     INSERT INTO route (id, bus_id, source_latitude, source_longitude, destination_latitude, destination_longitude) VALUES

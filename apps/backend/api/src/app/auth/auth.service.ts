@@ -1,19 +1,59 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { DatabaseService } from '../../common/services/database.service';
+import * as bcrypt from 'bcrypt';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private dbService: DatabaseService
+  ) {}
 
-  async login(loginDto: { username: string; password: string }) {
-    // For demo purposes, using hardcoded credentials
-    // In production, validate against database
-    if (loginDto.username === 'admin' && loginDto.password === 'admin123') {
-      const payload = { username: loginDto.username, sub: '1' };
-      return {
-        access_token: this.jwtService.sign(payload),
-      };
+  async login(loginDto: { email: string; password: string }) {
+    const query = 'SELECT * FROM users WHERE email = $1';
+    const result = await this.dbService.query(query, [loginDto.email]);
+
+    if (result.rows.length === 0) {
+      throw new UnauthorizedException('Invalid credentials');
     }
-    throw new UnauthorizedException('Invalid credentials');
+
+    const user = result.rows[0];
+    const isPasswordValid = await bcrypt.compare(
+      loginDto.password,
+      user.password
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const payload = {
+      id: user.id,
+      email: user.email,
+      sub: user.id.toString(),
+      role: user.role,
+    };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+
+  async register(registerDto: RegisterDto) {
+    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+
+    const query =
+      'INSERT INTO users (email, password, name, role) VALUES ($1, $2, $3, $4)';
+    await this.dbService.query(query, [
+      registerDto.email,
+      hashedPassword,
+      registerDto.name,
+      registerDto.role,
+    ]);
+
+    return {
+      message: 'User registered successfully',
+    };
   }
 }
