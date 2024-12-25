@@ -142,4 +142,19 @@ export class BusController {
   async deleteBusEntry(@Param('busId') busId: string) {
     return this.busService.deleteBus(busId);
   }
+
+  @Get('buses/:institutionId')
+  @ApiOperation({ summary: 'Get all buses for an institution' })
+  @ApiParam({ name: 'institutionId', description: 'Institution ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all buses for the specified institution.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Institution not found.',
+  })
+  getAllBuses(@Param('institutionId') institutionId: string) {
+    return this.busService.findAllBuses(institutionId);
+  }
 }

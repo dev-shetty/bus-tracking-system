@@ -293,4 +293,16 @@ export class BusService {
 
     return result.rows[0];
   }
+
+  async findAllBuses(institutionId: string) {
+    const query = `
+      SELECT * FROM bus
+      WHERE institution_id = $1
+      ORDER BY id`;
+    const result = await this.dbService.query(query, [institutionId]);
+    if (result.rows.length === 0) {
+      throw new NotFoundException('No buses found for this institution');
+    }
+    return result.rows;
+  }
 }
