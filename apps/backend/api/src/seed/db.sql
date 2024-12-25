@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS parent_student CASCADE;
 DROP TABLE IF EXISTS student CASCADE;
 DROP TABLE IF EXISTS parent CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS otp_storage CASCADE;
 
 -- Create users table
 CREATE TABLE users (
@@ -81,6 +82,16 @@ CREATE TABLE parent_student (
     PRIMARY KEY (student_usn, phone),
     FOREIGN KEY (student_usn) REFERENCES student(usn),
     FOREIGN KEY (phone) REFERENCES parent(phone)
+);
+
+-- Create otp_storage table
+CREATE TABLE otp_storage (
+    id SERIAL PRIMARY KEY,
+    mobile_number VARCHAR(15) NOT NULL UNIQUE,
+    otp VARCHAR(6) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    is_verified BOOLEAN DEFAULT FALSE
 );
 
 

@@ -7,9 +7,11 @@ import { AuthModule } from './auth/auth.module';
 import { InstitutionModule } from './institution/institution.module';
 import { BusModule } from './bus/bus.module';
 import { LocationModule } from './location/location.module';
+import { SmsService } from '../common/services/sms.service';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
-  providers: [DatabaseService, JwtStrategy],
+  providers: [DatabaseService, JwtStrategy, SmsService, ConfigService],
   imports: [
     PassportModule,
     JwtModule.register({

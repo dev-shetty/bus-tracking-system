@@ -1,18 +1,19 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private pool: Pool;
 
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
     this.pool = new Pool({
       // Add your PostgreSQL connection config here
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT),
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      host: this.configService.get('DB_HOST'),
+      port: parseInt(this.configService.get('DB_PORT')),
+      user: this.configService.get('DB_USER'),
+      password: this.configService.get('DB_PASSWORD'),
+      database: this.configService.get('DB_NAME'),
     });
   }
 
@@ -38,4 +39,4 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   async query(text: string, params?: any[]) {
     return this.pool.query(text, params);
   }
-} 
+}
