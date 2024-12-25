@@ -12,7 +12,6 @@ const AddNewStudentToBus: React.FC<AddNewStudentToBusProps> = ({ busId }) => {
     institutionId: '',
     parentName: '',
     parentPhone: '',
-    parentEmail: '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -43,7 +42,6 @@ const AddNewStudentToBus: React.FC<AddNewStudentToBusProps> = ({ busId }) => {
         {
           name: formData.parentName,
           phone: formData.parentPhone,
-          email: formData.parentEmail,
         },
       ],
     };
@@ -69,7 +67,6 @@ const AddNewStudentToBus: React.FC<AddNewStudentToBusProps> = ({ busId }) => {
         institutionId: '',
         parentName: '',
         parentPhone: '',
-        parentEmail: '',
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
@@ -170,21 +167,6 @@ const AddNewStudentToBus: React.FC<AddNewStudentToBusProps> = ({ busId }) => {
             id="parentPhone"
             name="parentPhone"
             value={formData.parentPhone}
-            onChange={handleInputChange}
-            required
-            className="w-full border rounded-md p-2"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="parentEmail" className="block text-sm font-medium">
-            Parent Email
-          </label>
-          <input
-            type="email"
-            id="parentEmail"
-            name="parentEmail"
-            value={formData.parentEmail}
             onChange={handleInputChange}
             required
             className="w-full border rounded-md p-2"

@@ -3,11 +3,9 @@ import React, { useEffect, useState } from 'react';
 interface Route {
   id: number;
   busId: string;
-  sourceLatitude: number;
-  sourceLongitude: number;
-  destinationLatitude: number;
-  destinationLongitude: number;
-  stops: string[]; // Assuming stops are also provided by the API
+  latitude: string;
+  longitude: string;
+  address: string; // Assuming stops are also provided by the API
 }
 
 const RoutesList: React.FC = () => {
@@ -54,22 +52,11 @@ const RoutesList: React.FC = () => {
             </div>
           </div>
           <div>
-            <h4 className="mb-2 font-medium">Source & Destination</h4>
-            <p className="text-sm">Source: ({route.sourceLatitude}, {route.sourceLongitude})</p>
-            <p className="text-sm">Destination: ({route.destinationLatitude}, {route.destinationLongitude})</p>
+            <h4 className="mb-2 font-medium">Address</h4>
+            <p className="text-sm">Coordinates: ({route.latitude}, {route.longitude})</p>
+            <p className="text-sm">Coordinates: ({route.address}, {route.longitude})</p>
           </div>
-          {route.stops && (
-            <div>
-              <h4 className="mt-4 mb-2 font-medium">Pickup/Drop Points</h4>
-              <div className="divide-y rounded-md border">
-                {route.stops.map((stop, index) => (
-                  <div key={index} className="px-3 py-2 text-sm">
-                    {stop}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          
         </div>
       ))}
     </div>

@@ -6,13 +6,15 @@ import EditBusDetails from './EditBusDetails';
 interface Student {
   id: number;
   name: string;
-  residence: string;
-  parentContact: string;
-  pickupLocation: string;
+  usn: string;
+  home_latitude: string;
+  home_longitude: string
+  home_address: string;
 }
 
 interface BusDetailProps {
   busId: string;
+  
   onClose: () => void;
 }
 
@@ -164,19 +166,23 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-4 px-4">Student Name</th>
-                      <th className="text-left py-4 px-4">Residence Location</th>
-                      <th className="text-left py-4 px-4">Parent Contact</th>
-                      <th className="text-left py-4 px-4">Pickup Location</th>
+                      <th className="text-left py-4 px-4">ID</th>
+                      <th className="text-left py-4 px-4">Name</th>
+                      <th className="text-left py-4 px-4">USN</th>
+                      <th className="text-left py-4 px-4">Home Latitude</th>
+                      <th className="text-left py-4 px-4">Home Longitude</th>
+                      <th className="text-left py-4 px-4">Address</th>
                     </tr>
                   </thead>
                   <tbody>
                     {students.map((student) => (
                       <tr key={student.id} className="border-b">
+                        <td className="py-4 px-4">{student.id}</td>
                         <td className="py-4 px-4">{student.name}</td>
-                        <td className="py-4 px-4">{student.residence}</td>
-                        <td className="py-4 px-4">{student.parentContact}</td>
-                        <td className="py-4 px-4">{student.pickupLocation}</td>
+                        <td className="py-4 px-4">{student.usn}</td>
+                        <td className="py-4 px-4">{student.home_latitude}</td>
+                        <td className="py-4 px-4">{student.home_longitude}</td>
+                        <td className="py-4 px-4">{student.home_address}</td>
                       </tr>
                     ))}
                   </tbody>

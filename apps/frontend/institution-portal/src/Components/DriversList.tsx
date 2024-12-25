@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
 interface Driver {
-  name: string;
-  busNo: number; // Adjusted to match your bus table
+  id: number;
+  name: string; // Adjusted to match your bus table
   mobile: string;
 }
 
@@ -46,7 +46,7 @@ const DriversList: React.FC = () => {
             <div className="h-8 w-8 rounded-full bg-pink-200 self-start" />
             <div className="flex-1">
               <h3 className="font-semibold">{driver.name}</h3>
-              <p className="text-sm text-gray-600">Bus No: {driver.busNo}</p>
+              <p className="text-sm text-gray-600">Driver ID: {driver.id}</p>
               <p className="text-sm text-gray-600">Mobile: {driver.mobile}</p>
             </div>
           </div>
