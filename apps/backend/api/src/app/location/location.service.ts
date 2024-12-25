@@ -70,6 +70,7 @@ export class LocationService {
         speed: vehicleData.speed,
         ignition: vehicleData.ignition,
         timestamp: vehicleData.createdDate,
+        angle: vehicleData.angle,
       };
     } catch (error) {
       if (error instanceof NotFoundException) {

@@ -33,6 +33,7 @@ export class LocationController {
         speed: { type: 'number' },
         ignition: { type: 'boolean' },
         timestamp: { type: 'string', format: 'date-time' },
+        angle: { type: 'number' },
       },
     },
   })
