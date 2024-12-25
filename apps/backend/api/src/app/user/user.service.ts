@@ -170,7 +170,7 @@ export class UserService {
         ) as parents
       FROM student s
       JOIN bus b ON s.bus_id = b.id
-      LEFT JOIN parent_student ps ON s.id = ps.student_id
+      LEFT JOIN parent_student ps ON s.usn = ps.student_usn
       LEFT JOIN parent p ON ps.phone = p.phone
       WHERE s.institution_id = $1
       GROUP BY s.id, b.bus_no

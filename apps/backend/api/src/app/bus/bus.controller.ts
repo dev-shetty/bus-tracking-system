@@ -24,13 +24,13 @@ import { UpdateBusDto } from './dto/update-bus.dto';
 import { DatabaseService } from '../../common/services/database.service';
 
 @ApiTags('Buses')
-@ApiBearerAuth()  
+@ApiBearerAuth()
 @Controller('buses')
 @UseGuards(AuthGuard('jwt'))
 export class BusController {
   constructor(
     private readonly busService: BusService,
-  private readonly dbService: DatabaseService
+    private readonly dbService: DatabaseService
   ) {}
 
   @Get('drivers')
@@ -53,7 +53,7 @@ export class BusController {
     return this.busService.findAllRoutes();
   }
 
-  @Get(':busId/students')
+  @Get('students/:busId')
   @ApiOperation({ summary: 'Get all students in a bus' })
   @ApiParam({ name: 'busId', description: 'Bus ID' })
   @ApiResponse({
@@ -64,7 +64,7 @@ export class BusController {
     return this.busService.findBusStudents(busId);
   }
 
-  @Post(':busId/students')
+  @Post('student/:busId')
   @ApiOperation({ summary: 'Add new student to bus' })
   @ApiParam({ name: 'busId', description: 'Bus ID' })
   @ApiResponse({
@@ -79,33 +79,15 @@ export class BusController {
     return this.busService.addStudent(busId, createStudentDto);
   }
 
-  @Put(':id')
-  @ApiOperation({ summary: 'Update a bus entry' })
+  @Delete('student/:usn')
+  @ApiOperation({ summary: 'Delete a student from bus' })
+  @ApiParam({ name: 'usn', description: 'Student USN' })
   @ApiResponse({
     status: 200,
-    description: 'Bus has been successfully updated.',
+    description: 'Student has been successfully deleted from the bus.',
   })
-  @ApiResponse({ status: 404, description: 'Bus not found.' })
-  async updateBusEntry(@Param('id') id: string, @Body() busData: UpdateBusDto) {
-    const query = `
-      UPDATE bus 
-      SET bus_no = $1, institution_id = $2, driver_id = $3, device_id = $4
-      WHERE id = $5
-      RETURNING *`;
-
-    const values = [
-      busData.bus_no,
-      busData.institution_id,
-      busData.driver_id,
-      busData.device_id,
-      id,
-    ];
-
-    const result = await this.dbService.query(query, values);
-    if (result.rows.length === 0) {
-      throw new NotFoundException('Bus not found');
-    }
-    return result.rows[0];
+  removeStudent(@Param('usn') usn: string) {
+    return this.busService.removeStudent(usn);
   }
 
   @Delete(':id')
@@ -116,34 +98,6 @@ export class BusController {
   })
   @ApiResponse({ status: 404, description: 'Bus not found.' })
   async deleteBusEntry(@Param('id') id: string) {
-    // First check if bus has any associated students
-    const checkStudentsQuery = `
-      SELECT COUNT(*) FROM student WHERE bus_id = $1
-    `;
-    const studentsResult = await this.dbService.query(checkStudentsQuery, [id]);
-    if (studentsResult.rows[0].count > 0) {
-      throw new BadRequestException(
-        'Cannot delete bus with associated students'
-      );
-    }
-
-    // Then check if bus has any routes
-    const checkRoutesQuery = `
-      SELECT COUNT(*) FROM route WHERE bus_id = $1
-    `;
-    const routesResult = await this.dbService.query(checkRoutesQuery, [id]);
-    if (routesResult.rows[0].count > 0) {
-      throw new BadRequestException('Cannot delete bus with associated routes');
-    }
-
-    const deleteQuery = `
-      DELETE FROM bus WHERE id = $1
-      RETURNING *`;
-
-    const result = await this.dbService.query(deleteQuery, [id]);
-    if (result.rows.length === 0) {
-      throw new NotFoundException('Bus not found');
-    }
-    return { message: 'Bus deleted successfully' };
+    return this.busService.deleteBus(id);
   }
 }

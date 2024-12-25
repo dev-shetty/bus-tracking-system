@@ -61,9 +61,9 @@ CREATE TABLE parent (
 
 -- Create student table
 CREATE TABLE student (
-    id SERIAL PRIMARY KEY,
+    id SERIAL,
     name VARCHAR(255) NOT NULL,
-    usn VARCHAR(255) NOT NULL,
+    usn VARCHAR(255) PRIMARY KEY,
     year INTEGER NOT NULL,
     home_latitude DECIMAL(10, 7) NOT NULL,
     home_longitude DECIMAL(10, 7) NOT NULL,
@@ -76,10 +76,10 @@ CREATE TABLE student (
 
 -- Create parent_student relationship table
 CREATE TABLE parent_student (
-    student_id INTEGER NOT NULL,
+    student_usn VARCHAR(255) NOT NULL,
     phone VARCHAR(20) NOT NULL,
-    PRIMARY KEY (student_id, phone),
-    FOREIGN KEY (student_id) REFERENCES student(id),
+    PRIMARY KEY (student_usn, phone),
+    FOREIGN KEY (student_usn) REFERENCES student(usn),
     FOREIGN KEY (phone) REFERENCES parent(phone)
 );
 
