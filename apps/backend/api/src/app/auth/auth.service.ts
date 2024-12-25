@@ -134,7 +134,6 @@ export class AuthService {
           is_verified = false
         RETURNING *`;
 
-      console.log(sendOtpDto.mobileNumber, otp, expiresAt);
       const result = await this.dbService.query(query, [
         sendOtpDto.mobileNumber,
         otp,
