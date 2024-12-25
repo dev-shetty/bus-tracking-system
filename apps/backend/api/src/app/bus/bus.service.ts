@@ -1,24 +1,90 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../../common/services/database.service';
 import { CreateStudentDto } from '../student/dto/student.dto';
-import { UpdateBusDto } from './dto/update-bus.dto';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { CreateBusDto } from './dto/create-bus.dto';
+import { CreateDriverDto } from './dto/create-driver.dto';
 
 @Injectable()
 export class BusService {
   constructor(private readonly dbService: DatabaseService) {}
 
-  async findAllDrivers() {
-    const result = await this.dbService.query('SELECT * FROM driver');
+  async createDriver(driverData: CreateDriverDto) {
+    const client = await this.dbService.getPool().connect();
+
+    try {
+      await client.query('BEGIN');
+
+      // Check if phone number is already registered
+      const phoneCheck = await client.query(
+        'SELECT id FROM driver WHERE mobile = $1',
+        [driverData.phone]
+      );
+
+      if (phoneCheck.rows.length > 0) {
+        throw new BadRequestException(
+          'Phone number already registered to another driver'
+        );
+      }
+
+      // Insert new driver
+      const result = await client.query(
+        `INSERT INTO driver (name, mobile)
+         VALUES ($1, $2)
+         RETURNING *`,
+        [driverData.name, driverData.phone]
+      );
+
+      await client.query('COMMIT');
+
+      return {
+        success: true,
+        message: 'Driver created successfully',
+        data: result.rows[0],
+      };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new BadRequestException({
+        success: false,
+        message: 'Failed to create driver',
+        error: error.message,
+      });
+    } finally {
+      client.release();
+    }
+  }
+
+  async findAllDrivers(institutionId: number) {
+    const query = `
+      SELECT DISTINCT d.* 
+      FROM driver d
+      INNER JOIN bus b ON d.id = b.driver_id 
+      WHERE b.institution_id = $1
+      ORDER BY d.id`;
+    const result = await this.dbService.query(query, [institutionId]);
     return result.rows;
   }
 
-  async findAllRoutes() {
-    const result = await this.dbService.query(`
-      SELECT r.*, b.bus_no 
+  async findRoute(busId: string) {
+    const result = await this.dbService.query(
+      `
+      SELECT r.* 
       FROM route r 
-      JOIN bus b ON r.bus_id = b.id
-    `);
+      WHERE r.bus_id = $1
+    `,
+      [busId]
+    );
+
+    if (result.rows.length === 0) {
+      throw new NotFoundException('Route not found for this bus');
+    }
+
     return result.rows;
   }
 
@@ -184,5 +250,47 @@ export class BusService {
       throw new NotFoundException('Bus not found');
     }
     return { message: 'Bus deleted successfully' };
+  }
+  async createBus(institutionId: string, createBusDto: CreateBusDto) {
+    try {
+      // Check if driver exists
+      const driverExists = await this.dbService.query(
+        'SELECT id FROM driver WHERE id = $1',
+        [createBusDto.driverId]
+      );
+
+      if (driverExists.rows.length === 0) {
+        throw new NotFoundException('Driver not found');
+      }
+
+      const result = await this.dbService.query(
+        'INSERT INTO bus (id, institution_id, driver_id, device_id) VALUES ($1, $2, $3, $4) RETURNING *',
+        [
+          createBusDto.id,
+          institutionId,
+          createBusDto.driverId,
+          createBusDto.deviceId,
+        ]
+      );
+      return result.rows[0];
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException('Failed to create bus');
+    }
+  }
+
+  async getBusDetails(busId: string) {
+    const result = await this.dbService.query(
+      'SELECT * FROM bus WHERE id = $1',
+      [busId]
+    );
+
+    if (result.rows.length === 0) {
+      throw new NotFoundException('Bus not found');
+    }
+
+    return result.rows[0];
   }
 }

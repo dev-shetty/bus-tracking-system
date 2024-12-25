@@ -1,56 +1,98 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Param,
   Body,
-  UseGuards,
-  Put,
+  Controller,
   Delete,
-  NotFoundException,
-  BadRequestException,
+  Get,
+  Param,
+  Post,
+  UseGuards,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiParam,
-} from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { BusService } from './bus.service';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateStudentDto } from '../student/dto/student.dto';
-import { UpdateBusDto } from './dto/update-bus.dto';
-import { DatabaseService } from '../../common/services/database.service';
+import { BusService } from './bus.service';
+import { CreateBusDto } from './dto/create-bus.dto';
+import { CreateDriverDto } from './dto/create-driver.dto';
 
 @ApiTags('Buses')
 @ApiBearerAuth()
 @Controller('buses')
 @UseGuards(AuthGuard('jwt'))
 export class BusController {
-  constructor(
-    private readonly busService: BusService,
-    private readonly dbService: DatabaseService
-  ) {}
+  constructor(private readonly busService: BusService) {}
 
-  @Get('drivers')
-  @ApiOperation({ summary: 'Get all drivers' })
+  @Post('driver/:institutionId')
+  @ApiOperation({ summary: 'Create a new driver' })
+  @ApiParam({ name: 'institutionId', description: 'Institution ID' })
   @ApiResponse({
-    status: 200,
-    description: 'Returns all drivers.',
+    status: 201,
+    description: 'Driver has been successfully created.',
   })
-  getAllDrivers() {
-    return this.busService.findAllDrivers();
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  async createDriver(@Body() createDriverDto: CreateDriverDto) {
+    return this.busService.createDriver(createDriverDto);
   }
 
-  @Get('routes')
-  @ApiOperation({ summary: 'Get all routes' })
+  @Post('bus/:institutionId')
+  @ApiOperation({ summary: 'Create a new bus' })
+  @ApiParam({ name: 'institutionId', description: 'Institution ID' })
+  @ApiResponse({
+    status: 201,
+    description: 'Bus has been successfully created.',
+  })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  async createBus(
+    @Param('institutionId') institutionId: string,
+    @Body() createBusDto: CreateBusDto
+  ) {
+    return this.busService.createBus(institutionId, createBusDto);
+  }
+
+  @Get('bus/:busId')
+  @ApiOperation({ summary: 'Get details of a specific bus' })
+  @ApiParam({ name: 'busId', description: 'Bus ID' })
   @ApiResponse({
     status: 200,
-    description: 'Returns all bus routes.',
+    description: 'Returns the details of the specified bus.',
   })
-  getAllRoutes() {
-    return this.busService.findAllRoutes();
+  @ApiResponse({
+    status: 404,
+    description: 'Bus not found.',
+  })
+  async getBusDetails(@Param('busId') busId: string) {
+    return this.busService.getBusDetails(busId);
+  }
+
+  @Get('drivers/:institutionId')
+  @ApiOperation({ summary: 'Get all drivers for an institution' })
+  @ApiParam({ name: 'institutionId', description: 'Institution ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all drivers for the specified institution.',
+  })
+  getAllDrivers(@Param('institutionId') institutionId: number) {
+    return this.busService.findAllDrivers(institutionId);
+  }
+
+  @Get('route/:busId')
+  @ApiOperation({ summary: 'Get route for a specific bus' })
+  @ApiParam({ name: 'busId', description: 'Bus ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the route for the specified bus.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Bus not found.',
+  })
+  getRoute(@Param('busId') busId: string) {
+    return this.busService.findRoute(busId);
   }
 
   @Get('students/:busId')
@@ -90,14 +132,14 @@ export class BusController {
     return this.busService.removeStudent(usn);
   }
 
-  @Delete(':id')
+  @Delete('bus/:busId')
   @ApiOperation({ summary: 'Delete a bus entry' })
   @ApiResponse({
     status: 200,
     description: 'Bus has been successfully deleted.',
   })
   @ApiResponse({ status: 404, description: 'Bus not found.' })
-  async deleteBusEntry(@Param('id') id: string) {
-    return this.busService.deleteBus(id);
+  async deleteBusEntry(@Param('busId') busId: string) {
+    return this.busService.deleteBus(busId);
   }
 }
