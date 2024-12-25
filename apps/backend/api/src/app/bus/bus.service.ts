@@ -20,10 +20,10 @@ export class BusService {
     return result.rows;
   }
 
-  async findBusStudents(busId: number) {
+  async findBusStudents(busId: string) {
     const result = await this.dbService.query(`
       SELECT s.*, 
-             array_agg(json_build_object('name', p.name, 'phone', p.phone, 'email', p.email)) as parents
+             array_agg(json_build_object('name', p.name, 'phone', p.phone)) as parents
       FROM student s
       LEFT JOIN parent_student ps ON s.id = ps.student_id
       LEFT JOIN parent p ON ps.phone = p.phone
@@ -33,7 +33,7 @@ export class BusService {
     return result.rows;
   }
 
-  async addStudent(busId: number, createStudentDto: CreateStudentDto) {
+  async addStudent(busId: string, createStudentDto: CreateStudentDto) {
     const client = await this.dbService.getPool().connect();
     
     try {

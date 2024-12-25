@@ -24,7 +24,7 @@ import { UpdateBusDto } from './dto/update-bus.dto';
 import { DatabaseService } from '../../common/services/database.service';
 
 @ApiTags('Buses')
-@ApiBearerAuth()
+@ApiBearerAuth()  
 @Controller('buses')
 @UseGuards(AuthGuard('jwt'))
 export class BusController {
@@ -61,7 +61,7 @@ export class BusController {
     description: 'Returns all students in the specified bus.',
   })
   getBusStudents(@Param('busId') busId: string) {
-    return this.busService.findBusStudents(+busId);
+    return this.busService.findBusStudents(busId);
   }
 
   @Post(':busId/students')
@@ -76,7 +76,7 @@ export class BusController {
     @Param('busId') busId: string,
     @Body() createStudentDto: CreateStudentDto
   ) {
-    return this.busService.addStudent(+busId, createStudentDto);
+    return this.busService.addStudent(busId, createStudentDto);
   }
 
   @Put(':id')
