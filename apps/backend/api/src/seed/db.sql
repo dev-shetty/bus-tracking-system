@@ -1,13 +1,11 @@
 -- Create tables
 DROP TABLE IF EXISTS route CASCADE;
-DROP TABLE IF EXISTS device CASCADE;
 DROP TABLE IF EXISTS bus CASCADE;
 DROP TABLE IF EXISTS driver CASCADE;
 DROP TABLE IF EXISTS institution CASCADE;
 DROP TABLE IF EXISTS parent_student CASCADE;
 DROP TABLE IF EXISTS student CASCADE;
 DROP TABLE IF EXISTS parent CASCADE;
-DROP TABLE IF EXISTS bus_location CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
 -- Create users table
@@ -49,10 +47,9 @@ CREATE TABLE bus (
 CREATE TABLE route (
     id SERIAL PRIMARY KEY,
     bus_id VARCHAR(50) NOT NULL,
-    source_latitude DECIMAL(10, 7) NOT NULL,
-    source_longitude DECIMAL(10, 7) NOT NULL,
-    destination_latitude DECIMAL(10, 7) NOT NULL,
-    destination_longitude DECIMAL(10, 7) NOT NULL,
+    latitude DECIMAL(10, 7) NOT NULL,
+    longitude DECIMAL(10, 7) NOT NULL,
+    address VARCHAR(255) NOT NULL,
     FOREIGN KEY (bus_id) REFERENCES bus(id)
 );
 
@@ -86,19 +83,6 @@ CREATE TABLE parent_student (
     FOREIGN KEY (phone) REFERENCES parent(phone)
 );
 
--- Create bus_location table
--- timestamp is primary key because timescaledb creates partitioning based on time
-CREATE TABLE bus_location (
-    id SERIAL,
-    bus_id VARCHAR(50) NOT NULL,
-    latitude NUMERIC(10, 7) NOT NULL,
-    longitude NUMERIC(10, 7) NOT NULL,
-    speed INTEGER NOT NULL,
-    course INTEGER NOT NULL,
-    timestamp TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (bus_id, timestamp),
-    FOREIGN KEY (bus_id) REFERENCES bus(id)
-);
 
 -- Insert data into tables
 
@@ -122,10 +106,8 @@ BEGIN
         ('Institution Admin', 'admin@sahyadri.edu.in', 'admin123', 'institution');
 
 
-    -- -- Insert routes
-    -- INSERT INTO route (id, bus_id, source_latitude, source_longitude, destination_latitude, destination_longitude) VALUES
-    --     (1, 1, 40.7128, -74.0060, 40.7589, -73.9851),
-    --     (2, 2, 34.0522, -118.2437, 34.1478, -118.1445);
+    -- !! Use the Sahyadri SQL Data to Populate the students, parents, and parent_student tables
+    -- Otherwise you can uncomment the following code to insert the data manually
 
     -- -- Insert parents
     -- INSERT INTO parent (phone, name) VALUES
@@ -142,10 +124,12 @@ BEGIN
     --     (1, '9876541203'),
     --     (2, '9876541204');
 
-    -- -- Insert bus_location data
-    -- INSERT INTO bus_location (id, bus_id, latitude, longitude, speed, course, timestamp) VALUES
-    --     (1, 1, 40.7200, -74.0080, 30, 90, NOW()),
-    --     (2, 2, 34.0550, -118.2460, 25, 180, NOW());
+      -- Populating routes
+    -- INSERT INTO route (bus_id, latitude, longitude, address)
+    --     SELECT DISTINCT 'KA19AE3048', home_latitude, home_longitude, home_address
+    --     FROM student;
+
+
 END;
 $$
  LANGUAGE plpgsql;
