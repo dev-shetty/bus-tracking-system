@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Edit2 } from 'lucide-react';
+import { X, Edit2, Trash } from 'lucide-react';
 import AddNewStudentToBus from './AddNewStudentToBus';
 import EditBusDetails from './EditBusDetails';
 
@@ -8,13 +8,12 @@ interface Student {
   name: string;
   usn: string;
   home_latitude: string;
-  home_longitude: string
+  home_longitude: string;
   home_address: string;
 }
 
 interface BusDetailProps {
   busId: string;
-  
   onClose: () => void;
 }
 
@@ -33,8 +32,11 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`http://localhost:3000/api/buses/${busId}`);
-        if (!response.ok) throw new Error(`Failed to fetch bus details for ID: ${busId}`);
+        const response = await fetch(
+          `http://localhost:3000/api/buses/${busId}`
+        );
+        if (!response.ok)
+          throw new Error(`Failed to fetch bus details for ID: ${busId}`);
         const busData = await response.json();
 
         setBusDetails(busData);
@@ -84,6 +86,43 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
     }
   };
 
+  const handleDeleteBus = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/buses/${busId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete bus');
+
+      onClose(); // Close the detail view after deletion
+    } catch (err) {
+      console.error(err);
+      setError('Failed to delete the bus.');
+    }
+  };
+
+  const handleDeleteStudent = async (usn: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/buses/student/${usn}`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete student with USN: ${usn}`);
+      }
+
+      // Remove the deleted student from the state
+      setStudents((prevStudents) =>
+        prevStudents.filter((student) => student.usn !== usn)
+      );
+    } catch (err) {
+      console.error(err);
+      setError(`Error deleting student with USN: ${usn}`);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-white z-50">
       <div className="flex h-full">
@@ -91,13 +130,22 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
         <div className="w-64 border-r p-6 bg-gray-50">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold">{busId}</h2>
-            <button
-              onClick={() => setIsEditing(true)}
-              className="p-2 rounded-full hover:bg-gray-100"
-            >
-              <Edit2 className="h-6 w-6" />
-              <span className="sr-only">Edit</span>
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsEditing(true)}
+                className="p-2 rounded-full hover:bg-gray-100"
+              >
+                <Edit2 className="h-6 w-6" />
+                <span className="sr-only">Edit</span>
+              </button>
+              <button
+                onClick={handleDeleteBus}
+                className="p-2 rounded-full hover:bg-red-100 text-red-500"
+              >
+                <Trash className="h-6 w-6" />
+                <span className="sr-only">Delete</span>
+              </button>
+            </div>
           </div>
           {busDetails && !isEditing ? (
             <div className="space-y-4">
@@ -127,7 +175,9 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
                 onClick={() => setShowAddStudentForm(!showAddStudentForm)}
                 className="w-full bg-black text-white rounded-md py-2 px-4 text-sm mt-4"
               >
-                {showAddStudentForm ? 'Hide Add Student Form' : 'Add New Student'}
+                {showAddStudentForm
+                  ? 'Hide Add Student Form'
+                  : 'Add New Student'}
               </button>
             </div>
           ) : null}
@@ -183,6 +233,14 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
                         <td className="py-4 px-4">{student.home_latitude}</td>
                         <td className="py-4 px-4">{student.home_longitude}</td>
                         <td className="py-4 px-4">{student.home_address}</td>
+                        <td className="py-4 px-4">
+                          <button
+                            onClick={() => handleDeleteStudent(student.usn)}
+                            className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
+                          >
+                            Delete
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
