@@ -7,8 +7,6 @@ import {
   Body,
   Param,
   UseGuards,
-  NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -89,5 +87,17 @@ export class InstitutionController {
   @ApiResponse({ status: 404, description: 'Institution not found' })
   async deleteInstitution(@Param('id') id: string) {
     return this.institutionService.remove(id);
+  }
+
+  @Get(':id/routes')
+  @ApiOperation({ summary: 'Get all routes for an institution' })
+  @ApiParam({ name: 'id', description: 'Institution ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all routes for the institution',
+  })
+  @ApiResponse({ status: 404, description: 'Institution not found' })
+  async getAllRoutesForInstitution(@Param('id') id: string) {
+    return this.institutionService.findAllRoutes(id);
   }
 }

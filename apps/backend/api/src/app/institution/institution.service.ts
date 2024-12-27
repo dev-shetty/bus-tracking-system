@@ -8,7 +8,6 @@ import {
   CreateInstitutionDto,
   UpdateInstitutionDto,
 } from './dto/institution.dto';
-
 @Injectable()
 export class InstitutionService {
   constructor(private readonly dbService: DatabaseService) {}
@@ -99,5 +98,28 @@ export class InstitutionService {
       message: 'Institution deleted successfully',
       data: result.rows[0],
     };
+  }
+
+  async findAllRoutes(institutionId: string) {
+    const query = `
+      SELECT r.bus_id,
+        ARRAY_AGG(json_build_object(
+          'id', r.id,
+          'latitude', r.latitude,
+          'longitude', r.longitude, 
+          'address', r.address
+        )) as stops
+      FROM route r
+      INNER JOIN bus b ON r.bus_id = b.id
+      WHERE b.institution_id = $1
+      GROUP BY r.bus_id
+    `;
+    const result = await this.dbService.query(query, [institutionId]);
+
+    if (result.rows.length === 0) {
+      throw new NotFoundException('No routes found for this institution');
+    }
+
+    return result.rows;
   }
 }
