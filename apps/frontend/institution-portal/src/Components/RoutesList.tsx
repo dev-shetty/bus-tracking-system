@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
 
-interface Route {
+interface Stop {
   id: number;
-  busId: string;
   latitude: string;
   longitude: string;
-  address: string; // Assuming stops are also provided by the API
+  address: string;
+}
+
+interface Route {
+  bus_id: string; // Changed from `busId` to match API response
+  stops: Stop[];
 }
 
 const RoutesList: React.FC = () => {
@@ -13,11 +17,13 @@ const RoutesList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const institutionId = 1;
+
   useEffect(() => {
     const fetchRoutes = async () => {
       try {
         const token = localStorage.getItem('accessToken');
-        const response = await fetch(`http://localhost:3000/api/buses/routes`, {
+        const response = await fetch(`http://localhost:3000/api/institutions/${institutionId}/routes`, {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
@@ -49,22 +55,25 @@ const RoutesList: React.FC = () => {
   return (
     <div className="grid gap-14 md:grid-cols-2 lg:grid-cols-3 mx-20">
       {routes.map((route) => (
-        <div key={route.id} className="bg-white rounded-lg shadow-md p-4">
+        <div key={route.bus_id} className="bg-white rounded-lg shadow-md p-4">
           <div className="mb-4 flex items-center gap-4">
             <div className="h-8 w-8 rounded-full bg-yellow-200" />
             <div>
-              <h3 className="font-semibold">Route ID: {route.id}</h3>
-              <p className="text-sm text-gray-600">Bus: {route.busId}</p>
+              <h3 className="font-semibold">Bus ID: {route.bus_id}</h3>
             </div>
           </div>
+
+          {/* Loop through the stops for this route */}
           <div>
-            <h4 className="mb-2 font-medium">Address</h4>
-            <p className="text-sm">
-              Coordinates: ({route.latitude}, {route.longitude})
-            </p>
-            <p className="text-sm">
-              Coordinates: ({route.address}, {route.longitude})
-            </p>
+            <h4 className="mb-2 font-medium">Stops</h4>
+            {route.stops.map((stop) => (
+              <div key={stop.id} className="mb-4">
+                <p className="text-sm text-gray-600">Address: {stop.address}</p>
+                <p className="text-sm">
+                  Coordinates: ({stop.latitude}, {stop.longitude})
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       ))}

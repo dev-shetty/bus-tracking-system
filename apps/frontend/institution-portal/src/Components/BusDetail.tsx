@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { X, Delete } from 'lucide-react';
 import AddNewStudentToBus from './AddNewStudentToBus';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+
+// Fix for marker icons
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+const DefaultIcon = L.icon({
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+
+L.Marker.prototype.options.icon = DefaultIcon;
 
 interface Student {
   id: number;
@@ -26,7 +39,7 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const token = localStorage.getItem('accessToken')||'';
+  const token = localStorage.getItem('accessToken') || '';
 
   const getAuthHeaders = () => {
     if (!token) {
@@ -127,6 +140,12 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
     }
   };
 
+  const handleAddStudentSuccess = (newStudent: Student) => {
+    setStudents((prevStudents) => [...prevStudents, newStudent]);
+    setShowAddStudentForm(false); // Hide the Add New Student form after successful addition
+    window.location.reload();
+  };
+
   return (
     <div className="fixed inset-0 bg-white z-50">
       <div className="flex h-full">
@@ -145,7 +164,7 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
                 <p className="text-sm text-gray-600">Driver ID:</p>
                 <p className="font-medium">{busDetails.driver_id}</p>
               </div>
-              <div>
+              {/* <div>
                 <p className="text-sm text-gray-600">Route Address:</p>
                 <p className="font-medium">{busRoute?.address}</p>
               </div>
@@ -156,7 +175,7 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
               <div>
                 <p className="text-sm text-gray-600">Route Longitude:</p>
                 <p className="font-medium">{busRoute?.longitude}</p>
-              </div>
+              </div> */}
               <div>
                 <p className="text-sm text-gray-600">Current Location:</p>
                 <p className="font-medium">{busLocation?.location}</p>
@@ -172,6 +191,10 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
               <div>
                 <p className="text-sm text-gray-600">Longitude:</p>
                 <p className="font-medium">{busLocation?.longitude}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Ignition:</p>
+                <p className="font-medium">{busLocation?.ignition? "ON": "OFF"}</p>
               </div>
               <button
                 onClick={() => setShowMap(!showMap)}
@@ -195,17 +218,41 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
         <div className="flex-1 p-6 relative flex flex-col">
           <button
             onClick={onClose}
-            className="absolute top-4 right-14 p-2 rounded-full hover:bg-gray-100"
+            className="absolute top-4 right-14 p-2 rounded-full hover:bg-gray-100 z-50"
           >
             <X className="h-6 w-6" />
             <span className="sr-only">Close</span>
           </button>
 
           {showAddStudentForm ? (
-            <AddNewStudentToBus busId={busId} accessToken={token}/>
+            <AddNewStudentToBus
+              busId={busId}
+              accessToken={token}
+              onAddStudent={handleAddStudentSuccess}
+            />
           ) : showMap ? (
-            <div className="flex-1 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-              <p className="text-gray-500">Map will be implemented here</p>
+            <div className="flex-1 bg-gray-100 rounded-lg flex items-center justify-center mb-4 relative z-10">
+              {busLocation?.latitude && busLocation?.longitude ? (
+                <MapContainer
+                  center={[busLocation.latitude, busLocation.longitude]} // Center map at the bus location
+                  zoom={13} // Adjust zoom level
+                  style={{ height: '100%', width: '100%' }}
+                >
+                  {/* OpenStreetMap tiles */}
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  {/* Marker for the bus */}
+                  <Marker
+                    position={[busLocation.latitude, busLocation.longitude]}
+                  >
+                    <Popup>Bus Current Location</Popup>
+                  </Marker>
+                </MapContainer>
+              ) : (
+                <p className="text-gray-500">Bus location not available</p>
+              )}
             </div>
           ) : (
             <div className="flex-1 overflow-x-auto mb-4">

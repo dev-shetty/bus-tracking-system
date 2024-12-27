@@ -3,9 +3,14 @@ import React, { useState } from 'react';
 interface AddNewStudentToBusProps {
   busId: string;
   accessToken: string; // Add accessToken prop for passing the token
+  onAddStudent: (newStudent: any) => void;
 }
 
-const AddNewStudentToBus: React.FC<AddNewStudentToBusProps> = ({ busId, accessToken }) => {
+const AddNewStudentToBus: React.FC<AddNewStudentToBusProps> = ({
+  busId,
+  accessToken,
+  onAddStudent,
+}) => {
   const [formData, setFormData] = useState({
     name: '',
     usn: '',
@@ -51,17 +56,23 @@ const AddNewStudentToBus: React.FC<AddNewStudentToBusProps> = ({ busId, accessTo
     };
 
     try {
-      const response = await fetch(`http://localhost:3000/api/buses/${busId}/students`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`, // Add the access token in headers
-        },
-        body: JSON.stringify(studentData),
-      });
+      const response = await fetch(
+        `http://localhost:3000/api/buses/student/${busId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`, // Add the access token in headers
+          },
+          body: JSON.stringify(studentData),
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error('Failed to add the student. Please try again.');
+      if (response.ok) {
+        const newStudent = await response.json();
+        onAddStudent(newStudent); // Notify parent component about new student
+      } else {
+        console.error('Failed to add student');
       }
 
       setSuccessMessage('Student added successfully!');
@@ -76,7 +87,10 @@ const AddNewStudentToBus: React.FC<AddNewStudentToBusProps> = ({ busId, accessTo
         parentPhone: '',
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+      console.log(error);
+      setError(
+        err instanceof Error ? err.message : 'An unexpected error occurred.'
+      );
     } finally {
       setLoading(false);
     }
@@ -86,7 +100,9 @@ const AddNewStudentToBus: React.FC<AddNewStudentToBusProps> = ({ busId, accessTo
     <div className="p-6 bg-gray-100 rounded-md shadow-md">
       <h2 className="text-2xl font-bold mb-4">Add New Student to Bus</h2>
       {error && <p className="text-red-500 mb-4">{error}</p>}
-      {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
+      {successMessage && (
+        <p className="text-green-500 mb-4">{successMessage}</p>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="name" className="block text-sm font-medium">
