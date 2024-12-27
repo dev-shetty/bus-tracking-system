@@ -90,8 +90,9 @@ const CollegeList: React.FC = () => {
     const navigate = useNavigate();
 
     const handleCollegeClick = (collegeId: string) => {
-      navigate(`/institution/${collegeId}`);
+      navigate(`/portal/institution/${collegeId}`);
     };
+    
 
   return (
     <div className="container mx-auto p-6">

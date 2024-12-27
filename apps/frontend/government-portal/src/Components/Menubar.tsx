@@ -7,8 +7,10 @@ const Menubar: React.FC = () => {
   const navigate = useNavigate();
 
   const handleNavigation = (path: string) => {
-    navigate(path);
-    setIsOpen(false);
+    if (path == '/') {
+      localStorage.removeItem('accessToken');
+      window.location.reload();
+    } else navigate(path);
   };
 
   return (
@@ -29,7 +31,7 @@ const Menubar: React.FC = () => {
           <div className="absolute left-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg z-50">
             <div className="py-1">
               <button
-                onClick={() => handleNavigation('/')}
+                onClick={() => handleNavigation('/portal')}
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 Colleges
@@ -40,11 +42,17 @@ const Menubar: React.FC = () => {
               >
                 Add College
               </button>
-              <button
+              {/* <button
                 onClick={() => handleNavigation('/notifications')}
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 Notifications
+              </button> */}
+              <button
+                onClick={() => handleNavigation('/')}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Logout
               </button>
             </div>
           </div>
