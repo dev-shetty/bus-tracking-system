@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 
 interface AddNewStudentToBusProps {
   busId: string;
+  accessToken: string; // Add accessToken prop for passing the token
 }
 
-const AddNewStudentToBus: React.FC<AddNewStudentToBusProps> = ({ busId }) => {
+const AddNewStudentToBus: React.FC<AddNewStudentToBusProps> = ({ busId, accessToken }) => {
   const [formData, setFormData] = useState({
     name: '',
+    usn: '',
+    year: '',
     homeLatitude: '',
     homeLongitude: '',
-    institutionId: '',
+    homeAddress: '',
     parentName: '',
     parentPhone: '',
   });
@@ -34,10 +37,11 @@ const AddNewStudentToBus: React.FC<AddNewStudentToBusProps> = ({ busId }) => {
 
     const studentData = {
       name: formData.name,
+      usn: formData.usn,
+      year: parseInt(formData.year, 10),
       home_latitude: parseFloat(formData.homeLatitude),
       home_longitude: parseFloat(formData.homeLongitude),
-      bus_id: parseInt(busId, 10),
-      institution_id: parseInt(formData.institutionId, 10),
+      home_address: formData.homeAddress,
       parents: [
         {
           name: formData.parentName,
@@ -51,6 +55,7 @@ const AddNewStudentToBus: React.FC<AddNewStudentToBusProps> = ({ busId }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`, // Add the access token in headers
         },
         body: JSON.stringify(studentData),
       });
@@ -62,9 +67,11 @@ const AddNewStudentToBus: React.FC<AddNewStudentToBusProps> = ({ busId }) => {
       setSuccessMessage('Student added successfully!');
       setFormData({
         name: '',
+        usn: '',
+        year: '',
         homeLatitude: '',
         homeLongitude: '',
-        institutionId: '',
+        homeAddress: '',
         parentName: '',
         parentPhone: '',
       });
@@ -90,6 +97,36 @@ const AddNewStudentToBus: React.FC<AddNewStudentToBusProps> = ({ busId }) => {
             id="name"
             name="name"
             value={formData.name}
+            onChange={handleInputChange}
+            required
+            className="w-full border rounded-md p-2"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="usn" className="block text-sm font-medium">
+            USN
+          </label>
+          <input
+            type="text"
+            id="usn"
+            name="usn"
+            value={formData.usn}
+            onChange={handleInputChange}
+            required
+            className="w-full border rounded-md p-2"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="year" className="block text-sm font-medium">
+            Year
+          </label>
+          <input
+            type="number"
+            id="year"
+            name="year"
+            value={formData.year}
             onChange={handleInputChange}
             required
             className="w-full border rounded-md p-2"
@@ -129,14 +166,14 @@ const AddNewStudentToBus: React.FC<AddNewStudentToBusProps> = ({ busId }) => {
         </div>
 
         <div>
-          <label htmlFor="institutionId" className="block text-sm font-medium">
-            Institution ID
+          <label htmlFor="homeAddress" className="block text-sm font-medium">
+            Home Address
           </label>
           <input
-            type="number"
-            id="institutionId"
-            name="institutionId"
-            value={formData.institutionId}
+            type="text"
+            id="homeAddress"
+            name="homeAddress"
+            value={formData.homeAddress}
             onChange={handleInputChange}
             required
             className="w-full border rounded-md p-2"

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Edit2, Trash } from 'lucide-react';
+import { X, Delete } from 'lucide-react';
 import AddNewStudentToBus from './AddNewStudentToBus';
-import EditBusDetails from './EditBusDetails';
 
 interface Student {
   id: number;
@@ -20,11 +19,24 @@ interface BusDetailProps {
 const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
   const [showMap, setShowMap] = useState(true);
   const [showAddStudentForm, setShowAddStudentForm] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
   const [busDetails, setBusDetails] = useState<any>(null);
+  const [busRoute, setBusRoute] = useState<any>(null);
+  const [busLocation, setBusLocation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const token = localStorage.getItem('accessToken')||'';
+
+  const getAuthHeaders = () => {
+    if (!token) {
+      throw new Error('Access token is missing. Please log in.');
+    }
+    return {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    };
+  };
 
   useEffect(() => {
     const fetchBusDetails = async () => {
@@ -32,30 +44,55 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(
-          `http://localhost:3000/api/buses/${busId}`
+        // Fetch bus specific details
+        const busResponse = await fetch(
+          `http://localhost:3000/api/buses/bus/${busId}`,
+          {
+            headers: getAuthHeaders(),
+          }
         );
-        if (!response.ok)
+        if (!busResponse.ok)
           throw new Error(`Failed to fetch bus details for ID: ${busId}`);
-        const busData = await response.json();
-
+        const busData = await busResponse.json();
         setBusDetails(busData);
 
+        // Fetch bus route details
+        const routeResponse = await fetch(
+          `http://localhost:3000/api/buses/route/${busId}`,
+          {
+            headers: getAuthHeaders(),
+          }
+        );
+        if (!routeResponse.ok)
+          throw new Error(`Failed to fetch route details for bus ID: ${busId}`);
+        const routeData = await routeResponse.json();
+        setBusRoute(routeData);
+
+        // Fetch current bus location
+        const locationResponse = await fetch(
+          `http://localhost:3000/api/location/${busId}`,
+          {
+            headers: getAuthHeaders(),
+          }
+        );
+        if (!locationResponse.ok)
+          throw new Error(
+            `Failed to fetch location details for bus ID: ${busId}`
+          );
+        const locationData = await locationResponse.json();
+        setBusLocation(locationData);
+
+        // Fetch students assigned to the bus
         const studentsResponse = await fetch(
-          `http://localhost:3000/api/buses/${busId}/students`
+          `http://localhost:3000/api/buses/students/${busId}`,
+          {
+            headers: getAuthHeaders(),
+          }
         );
         if (!studentsResponse.ok)
           throw new Error(`Failed to fetch students for bus ID: ${busId}`);
         const studentsData = await studentsResponse.json();
-
-        const formattedStudents = studentsData.map((student: any) => ({
-          id: student.id,
-          name: student.name,
-          residence: `${student.home_latitude}, ${student.home_longitude}`,
-          parentContact: student.parent_contact || 'Not Available',
-          pickupLocation: student.pickup_location || 'Not Available',
-        }));
-        setStudents(formattedStudents);
+        setStudents(studentsData);
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -66,46 +103,13 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
     fetchBusDetails();
   }, [busId]);
 
-  const handleEditSave = async (updatedData: any) => {
-    try {
-      const response = await fetch(`http://localhost:3000/api/buses/${busId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedData),
-      });
-      if (!response.ok) throw new Error('Failed to update bus details');
-
-      const updatedBus = await response.json();
-      setBusDetails(updatedBus);
-      setIsEditing(false);
-    } catch (err) {
-      console.error(err);
-      setError('Failed to save changes.');
-    }
-  };
-
-  const handleDeleteBus = async () => {
-    try {
-      const response = await fetch(`http://localhost:3000/api/buses/${busId}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) throw new Error('Failed to delete bus');
-
-      onClose(); // Close the detail view after deletion
-    } catch (err) {
-      console.error(err);
-      setError('Failed to delete the bus.');
-    }
-  };
-
   const handleDeleteStudent = async (usn: string) => {
     try {
       const response = await fetch(
         `http://localhost:3000/api/buses/student/${usn}`,
         {
           method: 'DELETE',
+          headers: getAuthHeaders(),
         }
       );
 
@@ -129,41 +133,45 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
         {/* Left Sidebar */}
         <div className="w-64 border-r p-6 bg-gray-50">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold">{busId}</h2>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setIsEditing(true)}
-                className="p-2 rounded-full hover:bg-gray-100"
-              >
-                <Edit2 className="h-6 w-6" />
-                <span className="sr-only">Edit</span>
-              </button>
-              <button
-                onClick={handleDeleteBus}
-                className="p-2 rounded-full hover:bg-red-100 text-red-500"
-              >
-                <Trash className="h-6 w-6" />
-                <span className="sr-only">Delete</span>
-              </button>
-            </div>
+            <h2 className="text-xl font-bold">{busDetails?.id}</h2>
           </div>
-          {busDetails && !isEditing ? (
+          {busDetails ? (
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-gray-600">From:</p>
-                <p className="font-medium">Sahyadri</p>
+                <p className="text-sm text-gray-600">Institution ID:</p>
+                <p className="font-medium">{busDetails.institution_id}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">To:</p>
-                <p className="font-medium">Ullal</p>
+                <p className="text-sm text-gray-600">Driver ID:</p>
+                <p className="font-medium">{busDetails.driver_id}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Departure Time:</p>
-                <p className="font-medium">9:30</p>
+                <p className="text-sm text-gray-600">Route Address:</p>
+                <p className="font-medium">{busRoute?.address}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Driver:</p>
-                <p className="font-medium">Ramesh Kumar</p>
+                <p className="text-sm text-gray-600">Route Latitude:</p>
+                <p className="font-medium">{busRoute?.latitude}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Route Longitude:</p>
+                <p className="font-medium">{busRoute?.longitude}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Current Location:</p>
+                <p className="font-medium">{busLocation?.location}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Vehicle Speed:</p>
+                <p className="font-medium">{busLocation?.speed} km/h</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Latitude:</p>
+                <p className="font-medium">{busLocation?.latitude}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Longitude:</p>
+                <p className="font-medium">{busLocation?.longitude}</p>
               </div>
               <button
                 onClick={() => setShowMap(!showMap)}
@@ -193,15 +201,8 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
             <span className="sr-only">Close</span>
           </button>
 
-          {isEditing ? (
-            <EditBusDetails
-              busId={busId}
-              initialData={busDetails}
-              onCancel={() => setIsEditing(false)}
-              onSave={handleEditSave}
-            />
-          ) : showAddStudentForm ? (
-            <AddNewStudentToBus busId={busId} />
+          {showAddStudentForm ? (
+            <AddNewStudentToBus busId={busId} accessToken={token}/>
           ) : showMap ? (
             <div className="flex-1 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
               <p className="text-gray-500">Map will be implemented here</p>
@@ -236,9 +237,9 @@ const BusDetail: React.FC<BusDetailProps> = ({ busId, onClose }) => {
                         <td className="py-4 px-4">
                           <button
                             onClick={() => handleDeleteStudent(student.usn)}
-                            className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
+                            className="bg-red-300 text-white px-3 py-1 rounded-md hover:bg-red-600"
                           >
-                            Delete
+                            <Delete />
                           </button>
                         </td>
                       </tr>

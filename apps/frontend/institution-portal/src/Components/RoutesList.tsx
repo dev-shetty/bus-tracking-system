@@ -16,7 +16,13 @@ const RoutesList: React.FC = () => {
   useEffect(() => {
     const fetchRoutes = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/buses/routes');
+        const token = localStorage.getItem('accessToken');
+        const response = await fetch(`http://localhost:3000/api/buses/routes`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch routes');
         }
@@ -53,10 +59,13 @@ const RoutesList: React.FC = () => {
           </div>
           <div>
             <h4 className="mb-2 font-medium">Address</h4>
-            <p className="text-sm">Coordinates: ({route.latitude}, {route.longitude})</p>
-            <p className="text-sm">Coordinates: ({route.address}, {route.longitude})</p>
+            <p className="text-sm">
+              Coordinates: ({route.latitude}, {route.longitude})
+            </p>
+            <p className="text-sm">
+              Coordinates: ({route.address}, {route.longitude})
+            </p>
           </div>
-          
         </div>
       ))}
     </div>
