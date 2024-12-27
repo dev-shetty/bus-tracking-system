@@ -305,4 +305,21 @@ export class BusService {
     }
     return result.rows;
   }
+
+  async findAllBusesFromAllInstitutions() {
+    const query = `
+      SELECT b.id, b.device_id, i.name AS institution_name, d.name AS driver_name
+      FROM bus b
+      JOIN institution i ON b.institution_id = i.id
+      JOIN driver d ON b.driver_id = d.id
+      ORDER BY b.id
+    `;
+    const result = await this.dbService.query(query);
+
+    if (result.rows.length === 0) {
+      throw new NotFoundException('No buses found');
+    }
+
+    return result.rows;
+  }
 }

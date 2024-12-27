@@ -157,4 +157,18 @@ export class BusController {
   getAllBuses(@Param('institutionId') institutionId: string) {
     return this.busService.findAllBuses(institutionId);
   }
+
+  @Get('all-buses')
+  @ApiOperation({ summary: 'Get all buses from all institutions' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all buses from all institutions.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No buses found.',
+  })
+  getAllBusesFromAllInstitutions() {
+    return this.busService.findAllBusesFromAllInstitutions();
+  }
 }
