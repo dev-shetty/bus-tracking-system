@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 interface CollegeFormData {
   institution: string;
   contact: string;
-  location: string;
+  latitude: number | '';
+  longitude: number | '';
 }
 
 const AddCollege: React.FC = () => {
@@ -12,29 +13,64 @@ const AddCollege: React.FC = () => {
   const [formData, setFormData] = useState<CollegeFormData>({
     institution: '',
     contact: '',
-    location: ''
+    latitude: '',
+    longitude: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]:
+        name === 'latitude' || name === 'longitude'
+          ? parseFloat(value) || ''
+          : value,
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log('Form submitted:', formData);
-    navigate('/');
+
+    if (formData.latitude === '' || formData.longitude === '') {
+      alert('Please provide valid latitude and longitude values.');
+      return;
+    }
+
+    const payload = {
+      name: formData.institution,
+      contact: formData.contact,
+      latitude: formData.latitude,
+      longitude: formData.longitude,
+    };
+
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch('http://localhost:3000/api/institutions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        console.log('College added successfully');
+        navigate('/portal');
+      } else {
+        console.error('Failed to add college:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error adding college:', error);
+    }
   };
 
   return (
     <div className="container mx-auto p-4 max-w-2xl">
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-6">Add a new college</h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-[120px,1fr] items-center gap-4">
             <label htmlFor="institution" className="text-gray-700">
@@ -69,16 +105,34 @@ const AddCollege: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-[120px,1fr] items-center gap-4">
-            <label htmlFor="location" className="text-gray-700">
-              Location
+            <label htmlFor="latitude" className="text-gray-700">
+              Latitude
             </label>
             <input
-              type="text"
-              id="location"
-              name="location"
-              value={formData.location}
+              type="number"
+              step="any"
+              id="latitude"
+              name="latitude"
+              value={formData.latitude}
               onChange={handleChange}
-              placeholder="Enter location"
+              placeholder="Enter latitude"
+              className="w-full px-3 py-2 border rounded-md"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-[120px,1fr] items-center gap-4">
+            <label htmlFor="longitude" className="text-gray-700">
+              Longitude
+            </label>
+            <input
+              type="number"
+              step="any"
+              id="longitude"
+              name="longitude"
+              value={formData.longitude}
+              onChange={handleChange}
+              placeholder="Enter longitude"
               className="w-full px-3 py-2 border rounded-md"
               required
             />

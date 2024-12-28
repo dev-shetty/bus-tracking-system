@@ -1,98 +1,74 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface College {
   id: string;
-  code: string;
   name: string;
-  address: string;
+  contact: string;
+  latitude: string;
+  longitude: string;
 }
 
-const colleges: College[] = [
-  {
-    id: '1',
-    code: 'SF',
-    name: 'Sahyadri',
-    address: 'Sahyadri College Of Engineering and Management, Adyar, Mangaluru, 575005'
-  },
-  {
-    id: '2',
-    code: 'BS',
-    name: 'Blue Sky',
-    address: 'Blue Sky English Medium Higher Primary School, Mangaluru, 575005'
-  },
-  {
-    id: '3',
-    code: 'MA',
-    name: 'Maple',
-    address: 'Maple College Of Engineering, Pumpwell, Mangaluru, 575005'
-  },
-  {
-    id: '4',
-    code: 'YC',
-    name: 'Yenepoya',
-    address: 'Yenepoya College Of Engineering, Pumpwell, Mangaluru, 575005'
-  },
-  {
-    id: '5',
-    code: 'GV',
-    name: 'Green Valley',
-    address: 'Green Valley Higher Primary School, Ashoknagar, Mangaluru, 575005'
-  },
-  {
-    id: '6',
-    code: 'AL',
-    name: 'Aloysious',
-    address: 'St. Aloysious Pre University College, Kodialbail, Mangaluru, 575005'
-  },
-  {
-    id: '7',
-    code: 'SR',
-    name: 'Srinivas',
-    address: 'Srinivas Institute of Technology and Management, Mangaluru, 575005'
-  },
-  {
-    id: '8',
-    code: 'BA',
-    name: 'Barakah',
-    address: 'Barakah Pre University College, Adyar katte, Mangaluru, 575005'
-  },
-  {
-    id: '9',
-    code: 'SU',
-    name: 'Sunshine',
-    address: 'Sunshine English Medium Higher Primary School, Mangaluru, 575005'
-  },
-  {
-    id: '10',
-    code: 'HA',
-    name: 'Harmony',
-    address: 'Harmony College Of Engineering, Hampankatta, Mangaluru, 575005'
-  }
-];
-
-const CollegeCard: React.FC<College & { onClick: () => void }> = ({ code, name, address, onClick }) => {
+const CollegeCard: React.FC<College & { onClick: () => void }> = ({ name, contact, latitude, longitude, onClick }) => {
   return (
-    <div 
+    <div
       onClick={onClick}
       className="bg-gradient-to-b from-pink-500 to-purple-600 rounded-lg p-6 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200"
     >
       <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center text-purple-600 font-semibold mb-4">
-        {code}
+        {name[0].toUpperCase()} {/* First letter of the college name */}
       </div>
       <h2 className="text-white text-xl font-semibold mb-2">{name}</h2>
-      <p className="text-white/90 text-sm">{address}</p>
+      <p className="text-white/90 text-sm">Contact: {contact}</p>
+      <p className="text-white/90 text-sm">Lat: {latitude}, Long: {longitude}</p>
     </div>
   );
 };
 
 const CollegeList: React.FC = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [colleges, setColleges] = useState<College[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    const handleCollegeClick = (collegeId: string) => {
-      navigate(`/portal/institution/${collegeId}`);
+  useEffect(() => {
+    const fetchColleges = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          throw new Error("Access token is missing. Please log in.");
+        }
+        const response = await fetch(
+          `http://localhost:3000/api/institutions`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = await response.json();
+        setColleges(data);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message); // Use the error message if it's an instance of Error
+        } else {
+          setError('An unknown error occurred'); // Fallback for non-Error types
+        }
+      } finally {
+        setLoading(false);
+      }
     };
-    
+
+    fetchColleges();
+  }, []);
+
+  const handleCollegeClick = (collegeId: string) => {
+    navigate(`/portal/institution/${collegeId}`);
+  };
+
+  if (loading) return <p>Loading colleges...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <div className="container mx-auto p-6">
